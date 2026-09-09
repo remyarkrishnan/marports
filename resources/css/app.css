@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-navy-deep: #0A1E3F;
+    --color-blue-rich: #0E4B75;
+    --color-gold-warm: #D9A441;
+    --color-gold-champagne: #F0D9A0;
+    --color-bg-ivory: #F7F5EF;
+    --color-text-charcoal: #17201D;
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg-ivory);
+  color: var(--color-text-charcoal);
+  overflow-x: hidden;
+}
+
+.font-serif-heading {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* Custom Glassmorphism */
+.glass-nav {
+  background: rgba(10, 30, 63, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(217, 164, 65, 0.22);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(14, 75, 117, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(10, 30, 63, 0.08);
+}
+
+.glass-card-dark {
+  background: rgba(10, 30, 63, 0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(217, 164, 65, 0.25);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.35);
+}
+
+/* Shimmer & Glow Effects */
+.gold-glow {
+  box-shadow: 0 0 25px rgba(217, 164, 65, 0.35);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #F0D9A0 0%, #D9A441 50%, #B88322 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-navy-gradient {
+  background: linear-gradient(135deg, #0A1E3F 0%, #0E4B75 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-navy-gradient {
+  background: linear-gradient(135deg, #0A1E3F 0%, #0E4B75 60%, #05142B 100%);
+}
+
+.gold-border-gradient {
+  border-image: linear-gradient(to right, #D9A441, #F0D9A0, #D9A441) 1;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F5EF;
+}
+::-webkit-scrollbar-thumb {
+  background: #0E4B75;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D9A441;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
