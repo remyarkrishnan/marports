@@ -69,7 +69,7 @@ export default function Dashboard({
       headerActions={
         <div className="flex items-center gap-2">
           <Link
-            href={adminUrls.registrations || '/cms/registrations'}
+            href={adminUrls.registrations || '/new/cms/registrations'}
             className="px-3.5 py-1.5 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-[#0A1E3F] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
           >
             <PlusCircle className="w-3.5 h-3.5" />
@@ -122,7 +122,7 @@ export default function Dashboard({
               </p>
             </div>
             <Link
-              href={adminUrls.registrations || '/cms/registrations'}
+              href={adminUrls.registrations || '/new/cms/registrations'}
               className="inline-flex items-center gap-1 text-xs font-semibold text-[#22C55E] hover:underline"
             >
               <span>Full Registration Hub</span>
@@ -173,7 +173,7 @@ export default function Dashboard({
                 <p className="text-xs text-slate-400 mt-0.5">Public CMS routes managed across the summit</p>
               </div>
               <Link
-                href={adminUrls.pages || '/cms/pages'}
+                href={adminUrls.pages || '/new/cms/pages'}
                 className="text-xs font-semibold text-[#22C55E] hover:underline flex items-center gap-1"
               >
                 <span>View All ({metrics.managed_pages})</span>
@@ -225,7 +225,7 @@ export default function Dashboard({
                 <p className="text-xs text-slate-400 mt-0.5">Most recent delegate and sponsor submissions</p>
               </div>
               <Link
-                href={adminUrls.registrations || '/cms/registrations'}
+                href={adminUrls.registrations || '/new/cms/registrations'}
                 className="text-xs font-semibold text-[#22C55E] hover:underline flex items-center gap-1"
               >
                 <span>View All</span>
@@ -288,13 +288,13 @@ export default function Dashboard({
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <a
-              href={adminUrls.registrationsExport || '/cms/registrations-export'}
+              href={adminUrls.registrationsExport || '/new/cms/registrations-export'}
               className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-xs font-semibold text-slate-200 transition-colors text-center"
             >
               Export CSV
             </a>
             <Link
-              href={adminUrls.settings || '/cms/settings'}
+              href={adminUrls.settings || '/new/cms/settings'}
               className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-xs font-semibold text-slate-200 transition-colors text-center"
             >
               System Settings

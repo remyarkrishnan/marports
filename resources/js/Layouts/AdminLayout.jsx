@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Clock,
   User as UserIcon,
+  Handshake,
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title, subtitle, headerActions }) {
@@ -29,25 +30,31 @@ export default function AdminLayout({ children, title, subtitle, headerActions }
   const navItems = [
     {
       label: 'Dashboard',
-      href: adminUrls.dashboard || '/cms',
+      href: adminUrls.dashboard || '/new/cms',
       icon: LayoutDashboard,
-      active: url.endsWith('/cms') || url.endsWith('/cms/'),
+      active: url.endsWith('/cms') || url.endsWith('/cms/') || url.endsWith('/new/cms') || url.endsWith('/new/cms/'),
     },
     {
       label: 'Registrations',
-      href: adminUrls.registrations || '/cms/registrations',
+      href: adminUrls.registrations || '/new/cms/registrations',
       icon: ClipboardList,
       active: url.includes('/cms/registrations'),
     },
     {
       label: 'Website Pages',
-      href: adminUrls.pages || '/cms/pages',
+      href: adminUrls.pages || '/new/cms/pages',
       icon: Layers,
       active: url.includes('/cms/pages'),
     },
     {
+      label: 'Sponsors & Partners',
+      href: adminUrls.sponsors || '/new/cms/sponsors',
+      icon: Handshake,
+      active: url.includes('/cms/sponsors'),
+    },
+    {
       label: 'Settings',
-      href: adminUrls.settings || '/cms/settings',
+      href: adminUrls.settings || '/new/cms/settings',
       icon: Settings,
       active: url.includes('/cms/settings'),
     },
@@ -55,7 +62,7 @@ export default function AdminLayout({ children, title, subtitle, headerActions }
 
   const handleLogout = (e) => {
     e.preventDefault();
-    router.post(adminUrls.logout || '/cms/logout');
+    router.post(adminUrls.logout || '/new/cms/logout');
   };
 
   return (
@@ -77,7 +84,7 @@ export default function AdminLayout({ children, title, subtitle, headerActions }
         {/* Top Brand Section */}
         <div>
           <div className="h-16 px-5 flex items-center justify-between border-b border-[#152747]">
-            <Link href="/cms" className="flex items-center gap-2.5 group">
+            <Link href={adminUrls.dashboard || '/new/cms'} className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#22C55E] to-[#16A34A] flex items-center justify-center text-[#0A1E3F] font-black text-sm shadow-sm">
                 M
               </div>

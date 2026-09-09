@@ -38,7 +38,7 @@ export default function Settings({ currentUser, staffUsers, eventSettings }) {
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
-    profileForm.put(adminUrls.settingsProfile || '/cms/settings/profile', { preserveScroll: true });
+    profileForm.put(adminUrls.settingsProfile || '/new/cms/settings/profile', { preserveScroll: true });
   };
 
   // 2. Password Form
@@ -50,7 +50,7 @@ export default function Settings({ currentUser, staffUsers, eventSettings }) {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    passwordForm.put(adminUrls.settingsPassword || '/cms/settings/password', {
+    passwordForm.put(adminUrls.settingsPassword || '/new/cms/settings/password', {
       preserveScroll: true,
       onSuccess: () => passwordForm.reset(),
     });
@@ -67,7 +67,7 @@ export default function Settings({ currentUser, staffUsers, eventSettings }) {
 
   const handleStaffSubmit = (e) => {
     e.preventDefault();
-    staffForm.post(adminUrls.settingsUsersStore || '/cms/settings/users', {
+    staffForm.post(adminUrls.settingsUsersStore || '/new/cms/settings/users', {
       preserveScroll: true,
       onSuccess: () => {
         staffForm.reset();
@@ -78,7 +78,7 @@ export default function Settings({ currentUser, staffUsers, eventSettings }) {
 
   const handleDeleteStaff = (user) => {
     if (confirm(`Are you sure you want to remove staff user ${user.name} (${user.email})?`)) {
-      router.delete(`${adminUrls.settingsUsersStore || '/cms/settings/users'}/${user.id}`, { preserveScroll: true });
+      router.delete(`${adminUrls.settingsUsersStore || '/new/cms/settings/users'}/${user.id}`, { preserveScroll: true });
     }
   };
 
@@ -102,7 +102,7 @@ export default function Settings({ currentUser, staffUsers, eventSettings }) {
 
   const handleEventSubmit = (e) => {
     e.preventDefault();
-    eventForm.put(adminUrls.settingsEvent || '/cms/settings/event', { preserveScroll: true });
+    eventForm.put(adminUrls.settingsEvent || '/new/cms/settings/event', { preserveScroll: true });
   };
 
   const tabs = [

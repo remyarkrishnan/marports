@@ -33,7 +33,7 @@ import {
 export default function Pages({ categories, totalPages, publishedCount, draftCount }) {
   const { props } = usePage();
   const adminUrls = props?.adminUrls || {};
-  const pagesUrl = adminUrls.pages || '/cms/pages';
+  const pagesUrl = adminUrls.pages || '/new/cms/pages';
 
   const [openCategories, setOpenCategories] = useState({
     'Global Header Menu': true,
@@ -304,7 +304,7 @@ export default function Pages({ categories, totalPages, publishedCount, draftCou
                           <div className="mt-4 pt-3.5 border-t border-[#152747]/80 space-y-2">
                             {/* Primary Button: Enter Live Studio */}
                             <Link
-                              href={`/cms/studio/${page.slug || page.id}`}
+                              href={`/new/cms/studio/${page.slug || page.id}`}
                               className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-purple-500/30 border border-purple-400/30 cursor-pointer"
                               title={`Enter Live Studio for ${page.title}`}
                             >

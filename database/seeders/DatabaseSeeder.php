@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CmsPagesSeeder::class,
             EventSettingsSeeder::class,
             RegistrationsSeeder::class,
+            SponsorsSeeder::class,
         ]);
     }
 }

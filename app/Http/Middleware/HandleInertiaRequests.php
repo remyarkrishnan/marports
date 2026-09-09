@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'siteLogo' => '/new/images/logo.png',
             'adminUrls' => [
-                'base' => url('/cms'),
+                'base' => url('/new/cms'),
                 'login' => route('admin.login'),
                 'loginSubmit' => route('admin.login.submit'),
                 'logout' => route('admin.logout'),
@@ -63,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 'registrationsStore' => route('admin.registrations.store'),
                 'registrationsExport' => route('admin.registrations.export'),
                 'pages' => route('admin.pages'),
+                'sponsors' => route('admin.sponsors'),
                 'settings' => route('admin.settings'),
                 'settingsProfile' => route('admin.settings.profile'),
                 'settingsPassword' => route('admin.settings.password'),

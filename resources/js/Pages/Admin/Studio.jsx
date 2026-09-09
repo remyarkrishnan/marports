@@ -190,7 +190,7 @@ export default function Studio({
   const handleSave = () => {
     setIsSaving(true);
     router.post(
-      `/cms/studio/${page.id || page.slug}`,
+      `/new/cms/studio/${page.id || page.slug}`,
       {
         content_blocks: contentBlocks,
         navigation_menus: menuLabels,
@@ -240,7 +240,7 @@ export default function Studio({
       {/* 1. Global Header Bar */}
       <header className="h-14 bg-[#0A1529] border-b border-[#152747] px-4 sm:px-6 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center gap-3">
-          <Link href="/cms/pages" className="flex items-center gap-2.5 group">
+          <Link href="/new/cms/pages" className="flex items-center gap-2.5 group">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#22C55E] to-[#16A34A] flex items-center justify-center text-[#0A1E3F] font-black text-xs shadow-xs">
               M
             </div>
@@ -282,7 +282,7 @@ export default function Studio({
           {/* Top Control Bar */}
           <div className="p-4 border-b border-[#152747] bg-[#0A1529]/60 flex items-center justify-between gap-3">
             <Link
-              href="/cms/pages"
+              href="/new/cms/pages"
               className="px-3 py-1.5 rounded-lg bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />

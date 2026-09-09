@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CmsPage;
 use App\Models\Registration;
+use App\Models\Sponsor;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -205,33 +206,46 @@ class SummitController extends Controller
             ],
         ];
 
-        // Exact Sponsors & Partners from marportsglobal.com
-        $sponsors = [
-            'registration' => [
-                ['name' => 'Mazagon Dock Shipbuilders Limited', 'role' => 'Registration Area Sponsor', 'tag' => 'MDSL'],
-            ],
-            'lunch_coffee' => [
-                ['name' => 'ABS Marine Services Ltd', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'ABS'],
-                ['name' => 'GRSE (Garden Reach Shipbuilders & Engineers)', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'GRSE'],
-            ],
-            'table_top' => [
-                ['name' => 'Nirmon Marine & Offshore Design Pvt Ltd', 'role' => 'Table Top Sponsor', 'tag' => 'NIRMON'],
-            ],
-            'associate' => [
-                ['name' => 'KNK Ship Management', 'role' => 'Associate Sponsor', 'tag' => 'KNK'],
-                ['name' => 'Core Axis Maritime Solutions L.L.C', 'role' => 'Associate Sponsor', 'tag' => 'CORE AXIS'],
-            ],
-            'promoting' => [
-                ['name' => 'Port of Rotterdam', 'role' => 'Promoting Organisation', 'tag' => 'ROTTERDAM'],
-            ],
-            'supporting' => [
-                ['name' => 'Institute of Chartered Shipbrokers (Madras Branch)', 'role' => 'Supporting Organisation', 'tag' => 'ICS Madras'],
-                ['name' => 'INSA (Indian National Shipowners\' Association - ESTD. 1929)', 'role' => 'Supporting Organisation', 'tag' => 'INSA'],
-                ['name' => 'SAI (Shipyards Association of India)', 'role' => 'Supporting Organisation', 'tag' => 'SAI'],
-                ['name' => 'ASA (Asian Shipowners\' Association)', 'role' => 'Supporting Organisation', 'tag' => 'ASA'],
-                ['name' => 'Institution of Naval Architects', 'role' => 'Supporting Organisation', 'tag' => 'INA'],
-            ],
-        ];
+        // Fetch active Sponsors & Partners grouped by sort_order (same sort_order = same row)
+        try {
+            $dbSponsors = Sponsor::active()->ordered()->get();
+        } catch (\Throwable $e) {
+            $dbSponsors = collect();
+        }
+
+        if ($dbSponsors->isNotEmpty()) {
+            $sponsors = $dbSponsors->groupBy('sort_order')->values()->map(function ($group) {
+                return $group->values();
+            })->toArray();
+        } else {
+            // Fallback default sponsors
+            $sponsors = [
+                'registration' => [
+                    ['name' => 'Mazagon Dock Shipbuilders Limited', 'role' => 'Registration Area Sponsor', 'tag' => 'MDSL'],
+                ],
+                'lunch_coffee' => [
+                    ['name' => 'ABS Marine Services Ltd', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'ABS'],
+                    ['name' => 'GRSE (Garden Reach Shipbuilders & Engineers)', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'GRSE'],
+                ],
+                'table_top' => [
+                    ['name' => 'Nirmon Marine & Offshore Design Pvt Ltd', 'role' => 'Table Top Sponsor', 'tag' => 'NIRMON'],
+                ],
+                'associate' => [
+                    ['name' => 'KNK Ship Management', 'role' => 'Associate Sponsor', 'tag' => 'KNK'],
+                    ['name' => 'Core Axis Maritime Solutions L.L.C', 'role' => 'Associate Sponsor', 'tag' => 'CORE AXIS'],
+                ],
+                'promoting' => [
+                    ['name' => 'Port of Rotterdam', 'role' => 'Promoting Organisation', 'tag' => 'ROTTERDAM'],
+                ],
+                'supporting' => [
+                    ['name' => 'Institute of Chartered Shipbrokers (Madras Branch)', 'role' => 'Supporting Organisation', 'tag' => 'ICS Madras'],
+                    ['name' => 'INSA (Indian National Shipowners\' Association - ESTD. 1929)', 'role' => 'Supporting Organisation', 'tag' => 'INSA'],
+                    ['name' => 'SAI (Shipyards Association of India)', 'role' => 'Supporting Organisation', 'tag' => 'SAI'],
+                    ['name' => 'ASA (Asian Shipowners\' Association)', 'role' => 'Supporting Organisation', 'tag' => 'ASA'],
+                    ['name' => 'Institution of Naval Architects', 'role' => 'Supporting Organisation', 'tag' => 'INA'],
+                ],
+            ];
+        }
 
         // Participating Organizations
         $participatingOrganizations = [
