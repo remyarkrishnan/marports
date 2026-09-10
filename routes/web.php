@@ -7,28 +7,25 @@ use App\Http\Controllers\Admin\AdminRegistrationController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminSponsorController;
 use App\Http\Controllers\SummitController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Public Summit Pages
 Route::get('/', [SummitController::class, 'index'])->name('home');
 Route::post('/register', [SummitController::class, 'register'])->name('register');
-Route::get('/new', [SummitController::class, 'index']);
-Route::post('/new/register', [SummitController::class, 'register']);
 
 // CMS Authentication
-Route::get('/new/cms/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
-Route::post('/new/cms/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-Route::post('/new/cms/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+Route::get('/cms/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
+Route::post('/cms/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/cms/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
-// Aliases for /admin, /cms, and standard /login pointing to /new/cms
-Route::redirect('/admin', '/new/cms');
-Route::redirect('/admin/login', '/new/cms/login');
-Route::redirect('/cms', '/new/cms');
-Route::redirect('/cms/login', '/new/cms/login');
+// Aliases for /admin and standard /login
+Route::redirect('/admin', '/cms');
+Route::redirect('/admin/login', '/cms/login');
 Route::get('/login', fn () => redirect()->route('admin.login'))->name('login');
 
 // CMS Protected Routes
-Route::middleware('auth')->prefix('new/cms')->name('admin.')->group(function () {
+Route::middleware('auth')->prefix('cms')->name('admin.')->group(function () {
     // Dashboard Overview
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -62,21 +59,26 @@ Route::middleware('auth')->prefix('new/cms')->name('admin.')->group(function () 
     Route::put('/settings/event', [AdminSettingController::class, 'updateEventSettings'])->name('settings.event');
 });
 
+// Single route alias for /new/cms/sponsors/{sponsor} POST update
+Route::post('/new/cms/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->middleware('auth');
+
 Route::get('/run-optimize-clear', function () {
     try {
         Artisan::call('optimize:clear');
-        return '<h3>Optimization Cleared Successfully:</h3><pre>' . Artisan::output() . '</pre>';
-    } catch (\Exception $e) {
-        return '<h3>Error:</h3>' . $e->getMessage();
+
+        return '<h3>Optimization Cleared Successfully:</h3><pre>'.Artisan::output().'</pre>';
+    } catch (Exception $e) {
+        return '<h3>Error:</h3>'.$e->getMessage();
     }
 });
 
 Route::get('/run-artisan-migration', function () {
     try {
         Artisan::call('migrate', ['--force' => true]);
-        return '<h3>Migration Result:</h3><pre>' . Artisan::output() . '</pre>';
-    } catch (\Exception $e) {
-        return '<h3>Error:</h3>' . $e->getMessage();
+
+        return '<h3>Migration Result:</h3><pre>'.Artisan::output().'</pre>';
+    } catch (Exception $e) {
+        return '<h3>Error:</h3>'.$e->getMessage();
     }
 });
 
@@ -92,11 +94,11 @@ Route::get('/run-seeders', function () {
                 '--class' => $seeder,
                 '--force' => true,
             ]);
-            $output .= "<b>{$seeder}:</b><br><pre>" . Artisan::output() . '</pre><hr>';
+            $output .= "<b>{$seeder}:</b><br><pre>".Artisan::output().'</pre><hr>';
         }
 
-        return '<h3>Seeders Executed Successfully:</h3>' . $output;
-    } catch (\Exception $e) {
-        return '<h3>Error running seeders:</h3>' . $e->getMessage();
+        return '<h3>Seeders Executed Successfully:</h3>'.$output;
+    } catch (Exception $e) {
+        return '<h3>Error running seeders:</h3>'.$e->getMessage();
     }
 });

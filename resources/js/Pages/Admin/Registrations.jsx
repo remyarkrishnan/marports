@@ -29,7 +29,7 @@ import {
 export default function Registrations({ registrations, metrics, filters }) {
   const { props } = usePage();
   const adminUrls = props?.adminUrls || {};
-  const registrationsUrl = adminUrls.registrations || '/new/cms/registrations';
+  const registrationsUrl = adminUrls.registrations || '/cms/registrations';
 
   const [search, setSearch] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
@@ -106,7 +106,7 @@ export default function Registrations({ registrations, metrics, filters }) {
 
   const handleAddSubmit = (e) => {
     e.preventDefault();
-    addForm.post(adminUrls.registrationsStore || '/new/cms/registrations', {
+    addForm.post(adminUrls.registrationsStore || '/cms/registrations', {
       onSuccess: () => {
         addForm.reset();
         setIsAddModalOpen(false);
@@ -156,7 +156,7 @@ export default function Registrations({ registrations, metrics, filters }) {
       headerActions={
         <div className="flex items-center gap-2">
           <a
-            href={`${adminUrls.registrationsExport || '/new/cms/registrations-export'}?status=${statusFilter}&search=${encodeURIComponent(search)}`}
+            href={`${adminUrls.registrationsExport || '/cms/registrations-export'}?status=${statusFilter}&search=${encodeURIComponent(search)}`}
             className="px-3 py-1.5 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition-colors"
           >
             <Download className="w-3.5 h-3.5 text-[#22C55E]" />

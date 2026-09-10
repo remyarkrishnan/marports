@@ -148,18 +148,16 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
       type: resolvedType,
     };
 
-    const baseSponsorsUrl = props?.adminUrls?.sponsors || '/new/cms/sponsors';
-
     if (editingSponsor) {
       // Use POST with _method spoofing or standard POST for multipart
-      router.post(`${baseSponsorsUrl}/${editingSponsor.id}`, payload, {
+      router.post(`/new/cms/sponsors/${editingSponsor.id}`, payload, {
         preserveScroll: true,
         onSuccess: () => {
           setModalOpen(false);
         },
       });
     } else {
-      router.post(baseSponsorsUrl, payload, {
+      router.post('/cms/sponsors', payload, {
         preserveScroll: true,
         onSuccess: () => {
           setModalOpen(false);
@@ -169,14 +167,12 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
   };
 
   const handleToggleActive = (sponsor) => {
-    const baseSponsorsUrl = props?.adminUrls?.sponsors || '/new/cms/sponsors';
-    router.post(`${baseSponsorsUrl}/${sponsor.id}/toggle-active`, {}, { preserveScroll: true });
+    router.post(`/cms/sponsors/${sponsor.id}/toggle-active`, {}, { preserveScroll: true });
   };
 
   const handleDelete = () => {
     if (!deleteConfirmSponsor) return;
-    const baseSponsorsUrl = props?.adminUrls?.sponsors || '/new/cms/sponsors';
-    router.delete(`${baseSponsorsUrl}/${deleteConfirmSponsor.id}`, {
+    router.delete(`/cms/sponsors/${deleteConfirmSponsor.id}`, {
       preserveScroll: true,
       onSuccess: () => {
         setDeleteConfirmSponsor(null);

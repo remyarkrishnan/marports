@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'siteLogo' => '/new/images/logo.png',
             'adminUrls' => [
-                'base' => url('/new/cms'),
+                'base' => url('/cms'),
                 'login' => route('admin.login'),
                 'loginSubmit' => route('admin.login.submit'),
                 'logout' => route('admin.logout'),

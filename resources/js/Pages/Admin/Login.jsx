@@ -4,7 +4,7 @@ import { Shield, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff 
 
 export default function Login() {
   const { props } = usePage();
-  const loginUrl = props?.adminUrls?.loginSubmit || '/new/cms/login';
+  const loginUrl = props?.adminUrls?.loginSubmit || '/cms/login';
   const [showPassword, setShowPassword] = useState(false);
 
   const { data, setData, post, processing, errors } = useForm({
