@@ -48,7 +48,6 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     'Table Top Sponsor',
     'Associate Sponsor',
     'Promoting Organisation',
-    'Supporting Organisation',
     'Lead Maritime Partner',
     'Badge & Lanyard Sponsor',
     'Gala Dinner Sponsor',

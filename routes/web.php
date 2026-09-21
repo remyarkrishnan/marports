@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Route;
 
 // Public Summit Pages
 Route::get('/', [SummitController::class, 'index'])->name('home');
+Route::get('/conference-topics/speakers', [SummitController::class, 'speakers'])->name('speakers');
+Route::get('/conference-topics', fn () => redirect()->to(url('/#topics')))->name('conference.topics');
+Route::get('/conference-topics/agenda', fn () => redirect()->to(url('/#panels')))->name('conference.agenda');
+Route::get('/conference-topics/advisory-board', fn () => redirect()->to(url('/#advisory-board')))->name('conference.advisory');
+Route::get('/speaker-bio/{id}', [SummitController::class, 'speakerBio'])->name('speaker.bio');
+Route::get('/panel-chair-bio/{id}', [SummitController::class, 'panelChairBio'])->name('panel_chair.bio');
 Route::post('/register', [SummitController::class, 'register'])->name('register');
 
 // CMS Authentication

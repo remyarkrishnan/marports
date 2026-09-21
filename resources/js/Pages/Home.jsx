@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
@@ -17,7 +17,8 @@ import {
   Layers,
   Award,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Clock
 } from 'lucide-react';
 
 import Navbar from '../Components/Navbar';
@@ -33,11 +34,14 @@ import PastEditionSection from '../Components/PastEditionSection';
 import ReadyToJoinSection from '../Components/ReadyToJoinSection';
 import Footer from '../Components/Footer';
 import RegistrationModal from '../Components/RegistrationModal';
+import SpeakerCard from '../Components/SpeakerCard';
+import { resolveAsset } from '../utils/asset';
 
 export default function Home({
   eventDetails,
   conferenceTopics,
   panelDiscussions,
+  speakingTopics,
   speakers,
   advisoryBoard,
   sponsors,
@@ -48,10 +52,59 @@ export default function Home({
   menuLabels = {},
 }) {
   const { siteLogo } = usePage().props;
-  const logoUrl = siteLogo || '/new/images/logo.png';
+  const logoUrl = resolveAsset(siteLogo || '/new/images/logo.png');
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [modalType, setModalType] = useState('delegate');
   const [liveMenuLabels, setLiveMenuLabels] = useState(menuLabels || {});
+  const heroVideoRef = useRef(null);
+
+  const fallbackSpeakingTopics = [
+    'Future-proofing maritime education: adapting to emerging technologies',
+    'Upskilling the maritime workforce: bridging academia and industry',
+    'Funding and risk management in ports, shipping, and shipbuilding',
+    'Strategic alliances in the maritime sector for competitive advantage',
+  ];
+  const speakingTopicsList = speakingTopics && speakingTopics.length > 0 ? speakingTopics : fallbackSpeakingTopics;
+
+  const fallbackPanelDiscussions = [
+    {
+      number: 1,
+      title: 'Maritime Outlook 2030',
+      subtitle: 'Global Challenges, Regulations, Trade & Industry Realities',
+      fullTitle: 'Maritime Outlook 2030 – Global Challenges, Regulations, Trade & Industry Realities',
+    },
+    {
+      number: 2,
+      title: 'Ports as Future Energy Hubs',
+      subtitle: 'Beyond Cargo Gateways: Transforming Port Ecosystems',
+      fullTitle: 'Ports as Future Energy Hubs – Beyond Cargo Gateways: Transforming Port Ecosystems',
+    },
+    {
+      number: 3,
+      title: 'Geopolitics & the Changing Shipbuilding Landscape',
+      subtitle: 'The Emerging Global Shipbuilding Power Shift',
+      fullTitle: 'Geopolitics & the Changing Shipbuilding Landscape – The Emerging Global Shipbuilding Power Shift',
+    },
+    {
+      number: 4,
+      title: 'Future Ports: No Depth, No Growth',
+      subtitle: 'The Strategic Role of Dredging for Ports & Ship Owners',
+      fullTitle: 'Future Ports: No Depth, No Growth – The Strategic Role of Dredging for Ports & Ship Owners',
+    },
+    {
+      number: 5,
+      title: 'Maritime 4.0',
+      subtitle: 'Balancing Digitalization, Innovation, Connectivity & Cyber Security',
+      fullTitle: 'Maritime 4.0 – Balancing Digitalization, Innovation, Connectivity & Cyber Security',
+    },
+  ];
+  const panelsList = panelDiscussions && panelDiscussions.length > 0 ? panelDiscussions : fallbackPanelDiscussions;
+
+  useEffect(() => {
+    if (heroVideoRef.current) {
+      heroVideoRef.current.play().catch(() => {});
+    }
+  }, []);
 
   const handleOpenRegister = (type = 'delegate') => {
     setModalType(type);
@@ -321,18 +374,53 @@ export default function Home({
       <Navbar onOpenRegister={handleOpenRegister} menuLabels={liveMenuLabels} />
 
       {/* 2. Hero Section */}
-      <section id="hero" className="relative min-h-[92vh] flex items-center justify-center pt-28 pb-20 bg-navy-gradient text-white overflow-hidden">
+      <section id="hero" className="relative min-h-[92vh] flex items-center justify-center pt-28 pb-20 bg-[#0A1E3F] text-white overflow-hidden">
+        {/* Continuous Background Video (Clickable to YouTube) */}
+        <a
+          href="https://www.youtube.com/watch?si=u-Wl_Rs5crdJ8MHu&v=JkzJvGrVvdA&feature=youtu.be"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 w-full h-full overflow-hidden z-0 cursor-pointer group"
+          title="Watch video on YouTube"
+          aria-label="Watch MARPORTS GLOBAL video on YouTube"
+        >
+          <video
+            ref={heroVideoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
+          >
+            <source src={resolveAsset('/video/render%2012.mp4')} type="video/mp4" />
+            <source src={resolveAsset('/video/render 12.mp4')} type="video/mp4" />
+          </video>
+          {/* Light Cinematic Tint to Ensure Video is Bright & Vivid */}
+          <div className="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A1E3F]/55 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-[#0A1E3F]/50" />
+
+          {/* Floating Watch on YouTube Badge */}
+          <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-12 z-20 flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#0A1E3F]/90 hover:bg-[#CC0000] text-white backdrop-blur-md border border-[#D9A441]/40 shadow-2xl transition-all duration-300 group-hover:scale-105">
+            <svg className="w-4 h-4 fill-current text-[#FF0000] group-hover:text-white transition-colors" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            <span className="text-xs font-bold uppercase tracking-wider">Watch on YouTube</span>
+          </div>
+        </a>
+
         {/* Particle Canvas */}
         <HeroCanvas />
 
         {/* Ambient Lighting Circles */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#0E4B75]/35 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[550px] h-[550px] bg-[#D9A441]/15 rounded-full blur-[150px] pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#0E4B75]/20 rounded-full blur-[140px] pointer-events-none z-[1]" />
+        <div className="absolute bottom-0 right-0 w-[550px] h-[550px] bg-[#D9A441]/10 rounded-full blur-[150px] pointer-events-none z-[1]" />
 
-        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10 w-full py-8">
+        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10 w-full py-8 pointer-events-none">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Content Area */}
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="lg:col-span-7 space-y-6 text-left pointer-events-auto">
               {/* Event Date & Location Pill Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -355,15 +443,15 @@ export default function Home({
                 </span>
               </motion.div>
 
-              {/* Main Bold Headline with Two Lines */}
+              {/* Main Bold Headline in Single Line */}
               <motion.h1
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="font-serif-heading text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-white leading-[1.05]"
+                className="font-serif-heading text-[28px] sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-extrabold tracking-tight text-white leading-tight whitespace-nowrap drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]"
               >
-                <span className="block">MARPORTS</span>
-                <span className="block text-gold-gradient">GLOBAL</span>
+                <span>MARPORTS</span>{' '}
+                <span className="text-gold-gradient">GLOBAL</span>
               </motion.h1>
 
               {/* Supporting Description */}
@@ -371,7 +459,7 @@ export default function Home({
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="text-base sm:text-lg text-white/85 max-w-2xl leading-relaxed font-normal"
+                className="text-base sm:text-lg text-white/95 max-w-2xl leading-relaxed font-normal drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
               >
                 A premium maritime forum for global leaders, port authorities, and industry innovators shaping the future of trade, sustainability and port excellence.
               </motion.p>
@@ -414,7 +502,7 @@ export default function Home({
             </div>
 
             {/* Right Interactive Holographic Badge Card */}
-            <div className="lg:col-span-5 flex justify-center">
+            <div className="lg:col-span-5 flex justify-center pointer-events-auto">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -682,56 +770,103 @@ export default function Home({
         </div>
       </section>
 
-      {/* 9. Key Panel Discussions */}
+      {/* 9. Key Panel Discussions & Speaking Topics (#panels) */}
       <section id="panels" className="py-24 bg-white relative overflow-hidden">
+        <div id="agenda" className="scroll-mt-24" />
+        <div id="panel-topics" className="scroll-mt-24" />
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
           <ScrollReveal className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#D9A441] bg-[#D9A441]/10 px-4 py-1.5 rounded-full mb-3 border border-[#D9A441]/30">
               EXECUTIVE DIALOGUE
             </span>
             <h2 className="font-serif-heading text-3xl sm:text-5xl font-extrabold text-[#0A1E3F] mb-4">
-              Key Panel Discussions
+              Key <span className="text-[#0E4B75]">Panel Discussions</span>
             </h2>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Interactive high-level panel debates featuring shipowners, shipyard directors, port authorities, and regulatory policymakers.
+              Addressing the evolving dynamics of the maritime sector
             </p>
           </ScrollReveal>
 
-          <div className="space-y-6 max-w-6xl mx-auto">
-            {panelDiscussions.map((panel, idx) => (
-              <ScrollReveal
-                key={idx}
-                className="p-6 sm:p-8 rounded-2xl bg-[#F7F5EF] border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-sm hover:shadow-lg transition-all duration-300"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
-                  <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F]">
-                    {panel.title}
-                  </h3>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#D9A441]">
-                    Panel Session #{idx + 1}
-                  </span>
+          {/* 5 Key Panel Discussions from official agenda */}
+          <div className="max-w-5xl mx-auto mb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {panelsList.map((panel, idx) => (
+                <ScrollReveal
+                  key={panel.number || idx}
+                  className={`bg-[#F7F5EF] rounded-2xl p-6 sm:p-7 border border-[#0E4B75]/15 hover:border-[#D9A441] hover:shadow-lg transition-all duration-300 ${
+                    idx === 4 ? 'md:col-span-2 md:max-w-2xl md:mx-auto w-full' : ''
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex-shrink-0 w-8 h-8 bg-[#0E4B75] text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5 shadow-sm">
+                      {idx + 1}
+                    </span>
+                    <div className="space-y-1">
+                      <p className="text-gray-800 font-medium text-sm sm:text-base leading-snug">
+                        <span className="font-bold text-[#0A1E3F]">{panel.title}</span>
+                        {panel.subtitle && (
+                          <span className="text-gray-700"> – {panel.subtitle}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+
+          {/* SPEAKING TOPICS block matching marportsglobal.com/conference-topics/agenda */}
+          <div className="max-w-5xl mx-auto">
+            <ScrollReveal className="mb-6">
+              <h2 className="font-serif-heading text-2xl sm:text-3xl font-extrabold text-[#0A1E3F] tracking-wide uppercase pb-4 border-b-2 border-gray-200">
+                SPEAKING TOPICS
+              </h2>
+            </ScrollReveal>
+
+            <ScrollReveal className="bg-white rounded-2xl shadow-lg border border-[#0E4B75]/15 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 sm:p-8">
+                <div className="space-y-4">
+                  {speakingTopicsList.slice(0, 2).map((topic, i) => (
+                    <div key={i} className="flex items-start">
+                      <span className="inline-block w-2.5 h-2.5 bg-[#0E4B75] rounded-full mt-2 mr-3 shrink-0" />
+                      <span className="text-sm sm:text-base font-medium text-gray-700 leading-relaxed">
+                        {topic}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <h4 className="text-xs font-semibold text-[#0E4B75] uppercase tracking-wider mb-3">
-                  {panel.subtitle}
-                </h4>
-                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  {panel.desc}
-                </p>
-              </ScrollReveal>
-            ))}
+                <div className="space-y-4">
+                  {speakingTopicsList.slice(2).map((topic, i) => (
+                    <div key={i} className="flex items-start">
+                      <span className="inline-block w-2.5 h-2.5 bg-[#0E4B75] rounded-full mt-2 mr-3 shrink-0" />
+                      <span className="text-sm sm:text-base font-medium text-gray-700 leading-relaxed">
+                        {topic}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-[#0E4B75] via-[#0A1E3F] to-[#0E4B75] py-4 px-6 sm:px-8">
+                <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-[#D9A441]" />
+                  <span>Final Conference Agenda Will Be Updated Soon</span>
+                </h3>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* 10. Key Speakers & Panelists */}
+      {/* 10. Panelists */}
       <section id="speakers-board" className="py-24 bg-[#F7F5EF] relative overflow-hidden">
+        <div id="speakers" className="scroll-mt-24" />
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
           <ScrollReveal className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#0E4B75] bg-[#0E4B75]/10 px-4 py-1.5 rounded-full mb-3 border border-[#0E4B75]/20">
               INDUSTRY THOUGHT LEADERS
             </span>
             <h2 className="font-serif-heading text-3xl sm:text-5xl font-extrabold text-[#0A1E3F] mb-4">
-              Speakers & Panelists
+              Panelists
             </h2>
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
               Hear directly from top operations directors, policy researchers, and commercial maritime innovators.
@@ -739,45 +874,8 @@ export default function Home({
           </ScrollReveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {speakers.map((speaker) => (
-              <ScrollReveal
-                key={speaker.id}
-                className="rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
-                    <img
-                      src={speaker.image}
-                      alt={speaker.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A1E3F] via-transparent to-transparent opacity-80" />
-                    <span className="absolute bottom-3 left-4 text-xs font-bold uppercase tracking-wider text-[#F0D9A0] bg-[#0A1E3F]/80 backdrop-blur-md px-3 py-1 rounded-md border border-[#D9A441]/40">
-                      {speaker.role}
-                    </span>
-                  </div>
-
-                  <div className="p-6">
-                    <h3 className="font-serif-heading text-lg font-bold text-[#0A1E3F] group-hover:text-[#0E4B75] transition-colors mb-1">
-                      {speaker.name}
-                    </h3>
-                    <p className="text-xs font-bold text-[#D9A441] mb-1">
-                      {speaker.designation}
-                    </p>
-                    <p className="text-xs text-[#0E4B75] font-semibold mb-4">
-                      {speaker.company}
-                    </p>
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {speaker.bio}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-500 font-medium">Taj Coromandel, Chennai</span>
-                  <span className="text-[11px] font-bold text-[#0E4B75]">5 Feb 2027</span>
-                </div>
-              </ScrollReveal>
+            {speakers.map((speaker, idx) => (
+              <SpeakerCard key={speaker.id} speaker={speaker} index={idx} />
             ))}
           </div>
         </div>

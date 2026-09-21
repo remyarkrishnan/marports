@@ -56,20 +56,20 @@ class AdminSponsorController extends Controller
 
         $logoPath = null;
 
-if ($request->hasFile('logo_file')) {
-    $file = $request->file('logo_file');
-    $filename = 'sponsor_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-    
-    // Direct path into public_html/new:
-    $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
+        if ($request->hasFile('logo_file')) {
+            $file = $request->file('logo_file');
+            $filename = 'sponsor_'.time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
 
-    if (!file_exists($destinationPath)) {
-        mkdir($destinationPath, 0755, true);
-    }
+            // Direct path into public_html/new:
+            $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
 
-    $file->move($destinationPath, $filename);
-    $logoPath = '/new/images/sponsors/' . $filename;
-} elseif (!empty($validated['logo_url'])) {
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $file->move($destinationPath, $filename);
+            $logoPath = '/new/images/sponsors/'.$filename;
+        } elseif (! empty($validated['logo_url'])) {
             $logoPath = $validated['logo_url'];
         }
 
@@ -116,17 +116,17 @@ if ($request->hasFile('logo_file')) {
             $updateData['logo'] = null;
         } elseif ($request->hasFile('logo_file')) {
             $file = $request->file('logo_file');
-    $filename = 'sponsor_' . time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-    
-    // Direct path into public_html/new:
-    $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
+            $filename = 'sponsor_'.time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
 
-    if (!file_exists($destinationPath)) {
-        mkdir($destinationPath, 0755, true);
-    }
+            // Direct path into public_html/new:
+            $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
 
-    $file->move($destinationPath, $filename);
-    $updateData['logo'] = '/new/images/sponsors/' . $filename;
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $file->move($destinationPath, $filename);
+            $updateData['logo'] = '/new/images/sponsors/'.$filename;
         } elseif ($request->has('logo_url')) {
             $updateData['logo'] = $validated['logo_url'] ?: null;
         }
@@ -142,7 +142,7 @@ if ($request->hasFile('logo_file')) {
     public function toggleActive(Sponsor $sponsor): RedirectResponse
     {
         $sponsor->update([
-            'is_active' => !$sponsor->is_active,
+            'is_active' => ! $sponsor->is_active,
         ]);
 
         $statusLabel = $sponsor->is_active ? 'Active' : 'Inactive';
