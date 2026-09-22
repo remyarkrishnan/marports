@@ -35,6 +35,8 @@ import ReadyToJoinSection from '../Components/ReadyToJoinSection';
 import Footer from '../Components/Footer';
 import RegistrationModal from '../Components/RegistrationModal';
 import SpeakerCard from '../Components/SpeakerCard';
+import CountdownTimer from '../Components/CountdownTimer';
+import TiltCard from '../Components/TiltCard';
 import { resolveAsset } from '../utils/asset';
 
 export default function Home({
@@ -393,8 +395,7 @@ export default function Home({
             preload="auto"
             className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
           >
-            <source src={resolveAsset('/video/render%2012.mp4')} type="video/mp4" />
-            <source src={resolveAsset('/video/render 12.mp4')} type="video/mp4" />
+            <source src={resolveAsset('/video/hero-bg-video-BXQNrT1Q.mp4')} type="video/mp4" />
           </video>
           {/* Light Cinematic Tint to Ensure Video is Bright & Vivid */}
           <div className="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors duration-300" />
@@ -413,24 +414,26 @@ export default function Home({
         {/* Particle Canvas */}
         <HeroCanvas />
 
-        {/* Ambient Lighting Circles */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#0E4B75]/20 rounded-full blur-[140px] pointer-events-none z-[1]" />
-        <div className="absolute bottom-0 right-0 w-[550px] h-[550px] bg-[#D9A441]/10 rounded-full blur-[150px] pointer-events-none z-[1]" />
+        {/* Ambient Floating Lighting Orbs & Tech Grid (Inspired by aitekconclave.com) */}
+        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-[#0E4B75]/25 rounded-full blur-[140px] pointer-events-none z-[1] ambient-orb-float-1" />
+        <div className="absolute bottom-0 right-0 w-[650px] h-[650px] bg-[#D9A441]/15 rounded-full blur-[160px] pointer-events-none z-[1] ambient-orb-float-2" />
+        <div className="absolute inset-0 tech-grid-dark pointer-events-none opacity-40 z-[1]" />
 
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10 w-full py-8 pointer-events-none">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Content Area */}
             <div className="lg:col-span-7 space-y-6 text-left pointer-events-auto">
-              {/* Event Date & Location Pill Badge */}
+              {/* Event Date & Location Pill Badge with Live Radar Pulse */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-card-dark border border-[#D9A441]/40 text-xs sm:text-sm font-semibold text-[#F0D9A0] shadow-lg"
+                className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-card-dark border border-[#D9A441]/40 text-xs sm:text-sm font-semibold text-[#F0D9A0] shadow-lg relative group overflow-hidden"
               >
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D9A441] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D9A441]"></span>
+                <div className="card-scan-line" />
+                <span className="flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
                 </span>
                 <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider">
                   <Calendar className="w-3.5 h-3.5 text-[#D9A441]" />
@@ -464,6 +467,15 @@ export default function Home({
                 A premium maritime forum for global leaders, port authorities, and industry innovators shaping the future of trade, sustainability and port excellence.
               </motion.p>
 
+              {/* Live Summit Countdown Timer */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.45 }}
+              >
+                <CountdownTimer targetDate="2027-02-05T09:00:00+05:30" />
+              </motion.div>
+
               {/* Primary & Secondary CTA Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 25 }}
@@ -473,26 +485,73 @@ export default function Home({
               >
                 <button
                   onClick={() => handleOpenRegister('delegate')}
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#D9A441] via-[#F0D9A0] to-[#D9A441] text-[#0A1E3F] font-extrabold text-xs uppercase tracking-widest shadow-xl shadow-[#D9A441]/20 hover:shadow-[#D9A441]/40 transition-all transform hover:-translate-y-1 flex items-center gap-2"
+                  className="btn-shimmer px-8 py-4 rounded-xl bg-gradient-to-r from-[#D9A441] via-[#F0D9A0] to-[#D9A441] text-[#0A1E3F] font-extrabold text-xs uppercase tracking-widest shadow-xl shadow-[#D9A441]/25 hover:shadow-[#D9A441]/40 transition-all transform hover:-translate-y-1 flex items-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-[#0A1E3F]" />
                   Register Now
                 </button>
 
                 <button
                   onClick={() => handleOpenRegister('sponsor')}
-                  className="px-8 py-4 rounded-xl border border-[#D9A441]/60 hover:border-[#D9A441] text-[#F0D9A0] hover:text-white font-bold text-xs uppercase tracking-widest bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2"
+                  className="px-8 py-4 rounded-xl border border-[#D9A441]/60 hover:border-[#D9A441] text-[#F0D9A0] hover:text-white font-bold text-xs uppercase tracking-widest bg-white/5 hover:bg-white/10 transition-all flex items-center gap-2 hover:-translate-y-1 shadow-lg hover:shadow-[#D9A441]/15"
                 >
                   Become a Sponsor
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
 
+              {/* Live Metrics Glass Capsule (Inspired by aitekconclave.com) */}
+              <motion.div
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="pt-2 max-w-xl"
+              >
+                <div className="rounded-2xl p-4 sm:p-5 glass-card-dark border border-[#D9A441]/35 backdrop-blur-xl shadow-2xl flex items-center justify-around divide-x divide-white/10 relative overflow-hidden group">
+                  <div className="card-decor-tl" />
+                  <div className="card-decor-tr" />
+                  <div className="card-scan-line" />
+                  
+                  <div className="text-center px-2 sm:px-3">
+                    <span className="font-serif-heading text-xl sm:text-2xl font-black text-[#F0D9A0] block">
+                      500+
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                      Leaders
+                    </span>
+                  </div>
+                  <div className="text-center px-2 sm:px-3">
+                    <span className="font-serif-heading text-xl sm:text-2xl font-black text-[#F0D9A0] block">
+                      50+
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                      Port Authorities
+                    </span>
+                  </div>
+                  <div className="text-center px-2 sm:px-3">
+                    <span className="font-serif-heading text-xl sm:text-2xl font-black text-[#F0D9A0] block">
+                      28+
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                      Awards
+                    </span>
+                  </div>
+                  <div className="text-center px-2 sm:px-3">
+                    <span className="font-serif-heading text-xl sm:text-2xl font-black text-[#F0D9A0] block">
+                      15+
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                      Keynote Panels
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.7 }}
-                className="pt-2 text-xs text-white/60 flex items-center gap-2"
+                className="pt-1 text-xs text-white/60 flex items-center gap-2"
               >
                 <span>Organized by</span>
                 <strong className="text-white font-semibold">E Hub Events Private Limited</strong>
@@ -501,7 +560,7 @@ export default function Home({
               </motion.div>
             </div>
 
-            {/* Right Interactive Holographic Badge Card */}
+            {/* Right Interactive Holographic Badge Card wrapped in 3D TiltCard */}
             <div className="lg:col-span-5 flex justify-center pointer-events-auto">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -509,7 +568,10 @@ export default function Home({
                 transition={{ duration: 0.9, delay: 0.4 }}
                 className="w-full max-w-md relative"
               >
-                <div className="relative rounded-3xl p-8 glass-card-dark border-2 border-[#D9A441]/40 shadow-2xl backdrop-blur-2xl flex flex-col justify-between aspect-square">
+                <TiltCard
+                  maxTilt={10}
+                  className="rounded-3xl p-8 glass-card-dark border-2 border-[#D9A441]/40 shadow-2xl backdrop-blur-2xl aspect-square"
+                >
                   {/* Decorative Anchor Rings */}
                   <div className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none" />
 
@@ -528,7 +590,7 @@ export default function Home({
                   <div className="my-auto text-center space-y-4">
                     <motion.div
                       whileHover={{ scale: 1.08 }}
-                      className="w-32 h-32 mx-auto rounded-3xl bg-white p-3 shadow-2xl gold-glow border-2 border-[#D9A441] flex items-center justify-center"
+                      className="w-32 h-32 mx-auto rounded-3xl bg-white p-3 shadow-2xl gold-glow border-2 border-[#D9A441] flex items-center justify-center cursor-pointer transition-transform duration-300"
                     >
                       <img src={logoUrl} alt="MARPORTS GLOBAL Official Logo" className="w-full h-full object-contain" />
                     </motion.div>
@@ -552,7 +614,7 @@ export default function Home({
                       FEB 5, 2027
                     </span>
                   </div>
-                </div>
+                </TiltCard>
               </motion.div>
             </div>
           </div>
@@ -572,10 +634,10 @@ export default function Home({
             Participating Organizations
           </span>
         </div>
-        <div className="flex whitespace-nowrap overflow-hidden">
+        <div className="flex whitespace-nowrap overflow-hidden marquee-fade-mask">
           <div className="animate-marquee flex items-center gap-10 text-sm font-semibold text-gray-700">
             {[...participatingOrganizations, ...participatingOrganizations].map((org, i) => (
-              <span key={i} className="flex items-center gap-3 shrink-0 px-4 py-2 bg-[#F7F5EF] rounded-xl border border-gray-200">
+              <span key={i} className="flex items-center gap-3 shrink-0 px-4 py-2 bg-[#F7F5EF] rounded-xl border border-gray-200 shadow-sm hover:border-[#D9A441] hover:shadow-md transition-all">
                 <Building className="w-4 h-4 text-[#0E4B75]" />
                 <span>{org}</span>
               </span>
@@ -585,8 +647,10 @@ export default function Home({
       </section>
 
       {/* 6. Explore More Cards */}
-      <section className="py-20 bg-[#F7F5EF]">
-        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12">
+      <section className="py-20 bg-[#F7F5EF] relative overflow-hidden">
+        {/* Subtle Ambient Orb */}
+        <div className="absolute top-1/2 -left-20 w-80 h-80 bg-[#D9A441]/5 rounded-full blur-[120px] pointer-events-none ambient-orb-float-1" />
+        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
           <ScrollReveal className="text-center max-w-3xl mx-auto mb-14">
             <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#0E4B75] bg-[#0E4B75]/10 px-4 py-1.5 rounded-full mb-3 border border-[#0E4B75]/20">
               EXPLORE THE SUMMIT
@@ -597,55 +661,70 @@ export default function Home({
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollReveal className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#0E4B75]/10 text-[#0E4B75] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Compass className="w-6 h-6" />
+            <ScrollReveal>
+              <TiltCard className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-2xl hover:shadow-[#D9A441]/10 transition-all duration-300 h-full">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#0E4B75]/10 text-[#0E4B75] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <Compass className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2 group-hover:text-[#0E4B75] transition-colors">
+                    Conference Topics
+                  </h3>
+                  <p className="text-xs text-gray-600 leading-relaxed mb-6">
+                    4 core pillars addressing decarbonization mandates, port infrastructure expansion, modern shipyards, and smart digital port twins.
+                  </p>
                 </div>
-                <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2">
-                  Conference Topics
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed mb-6">
-                  4 core pillars addressing decarbonization mandates, port infrastructure expansion, modern shipyards, and smart digital port twins.
-                </p>
-              </div>
-              <a href="#topics" className="text-xs font-bold text-[#0E4B75] hover:text-[#D9A441] flex items-center gap-1">
-                View Conference Topics <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <div className="card-accent-bar" />
+                  <a href="#topics" className="text-xs font-bold text-[#0E4B75] group-hover:text-[#D9A441] flex items-center gap-1 transition-colors">
+                    View Topics <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </div>
+              </TiltCard>
             </ScrollReveal>
 
-            <ScrollReveal className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#D9A441]/15 text-[#D9A441] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Award className="w-6 h-6" />
+            <ScrollReveal>
+              <TiltCard className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-2xl hover:shadow-[#D9A441]/10 transition-all duration-300 h-full">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#D9A441]/15 text-[#D9A441] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <Award className="w-6 h-6 group-hover:animate-star-rotate" />
+                  </div>
+                  <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2 group-hover:text-[#D9A441] transition-colors">
+                    Excellence Awards
+                  </h3>
+                  <p className="text-xs text-gray-600 leading-relaxed mb-6">
+                    28 official awards celebrating outstanding shipowners, port developers, maritime AI innovators, and lifetime achievement honorees.
+                  </p>
                 </div>
-                <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2">
-                  Excellence Awards
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed mb-6">
-                  30 official awards celebrating outstanding shipowners, port developers, maritime AI innovators, and lifetime achievement honorees.
-                </p>
-              </div>
-              <a href="#awards" className="text-xs font-bold text-[#0E4B75] hover:text-[#D9A441] flex items-center gap-1">
-                Explore Award Categories <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <div className="card-accent-bar" />
+                  <a href="#awards" className="text-xs font-bold text-[#0E4B75] group-hover:text-[#D9A441] flex items-center gap-1 transition-colors">
+                    Explore Awards <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </div>
+              </TiltCard>
             </ScrollReveal>
 
-            <ScrollReveal className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#0A1E3F]/10 text-[#0A1E3F] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Calendar className="w-6 h-6" />
+            <ScrollReveal>
+              <TiltCard className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-2xl hover:shadow-[#D9A441]/10 transition-all duration-300 h-full">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#0A1E3F]/10 text-[#0A1E3F] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <Calendar className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2 group-hover:text-[#0A1E3F] transition-colors">
+                    Event Details & Date
+                  </h3>
+                  <p className="text-xs text-gray-600 leading-relaxed mb-6">
+                    Friday, 5th February 2027 at the iconic Taj Coromandel, Chennai, Tamil Nadu, India.
+                  </p>
                 </div>
-                <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F] mb-2">
-                  Event Details & Date
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed mb-6">
-                  Friday, 5th February 2027 at the iconic Taj Coromandel, Chennai, Tamil Nadu, India.
-                </p>
-              </div>
-              <a href="#contact" className="text-xs font-bold text-[#0E4B75] hover:text-[#D9A441] flex items-center gap-1">
-                Join & Register <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <div className="card-accent-bar" />
+                  <a href="#contact" className="text-xs font-bold text-[#0E4B75] group-hover:text-[#D9A441] flex items-center gap-1 transition-colors">
+                    Join & Register <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </div>
+              </TiltCard>
             </ScrollReveal>
           </div>
         </div>
@@ -735,35 +814,36 @@ export default function Home({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {conferenceTopics.map((topic) => (
-              <ScrollReveal
-                key={topic.number}
-                className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-xl transition-all duration-300 space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-serif-heading font-extrabold text-[#D9A441]">
-                    {topic.number}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#0E4B75] bg-[#0E4B75]/10 px-3 py-1 rounded-md">
-                    Track Theme
-                  </span>
-                </div>
+              <ScrollReveal key={topic.number}>
+                <TiltCard className="p-8 rounded-3xl bg-white border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-md hover:shadow-2xl hover:shadow-[#D9A441]/15 transition-all duration-300 h-full space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="outline-stroke-number text-4xl font-black">
+                      #{String(topic.number).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#0E4B75] bg-[#0E4B75]/10 px-3 py-1 rounded-md border border-[#0E4B75]/15">
+                      Track Theme
+                    </span>
+                  </div>
 
-                <h3 className="font-serif-heading text-xl font-bold text-[#0A1E3F]">
-                  {topic.title}
-                </h3>
+                  <h3 className="font-serif-heading text-xl sm:text-2xl font-bold text-[#0A1E3F] group-hover:text-[#0E4B75] transition-colors">
+                    {topic.title}
+                  </h3>
 
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {topic.description}
-                </p>
+                  <div className="card-accent-bar" />
 
-                <ul className="space-y-2.5 pt-2 border-t border-gray-100">
-                  {topic.points.map((pt, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-700">
-                      <CheckCircle2 className="w-4 h-4 text-[#D9A441] shrink-0 mt-0.5" />
-                      <span>{pt}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    {topic.description}
+                  </p>
+
+                  <ul className="space-y-2.5 pt-3 border-t border-gray-100">
+                    {topic.points.map((pt, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-700">
+                        <CheckCircle2 className="w-4 h-4 text-[#D9A441] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </TiltCard>
               </ScrollReveal>
             ))}
           </div>
@@ -774,6 +854,8 @@ export default function Home({
       <section id="panels" className="py-24 bg-white relative overflow-hidden">
         <div id="agenda" className="scroll-mt-24" />
         <div id="panel-topics" className="scroll-mt-24" />
+        {/* Subtle Ambient Orb */}
+        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-[#0E4B75]/5 rounded-full blur-[120px] pointer-events-none ambient-orb-float-2" />
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
           <ScrollReveal className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#D9A441] bg-[#D9A441]/10 px-4 py-1.5 rounded-full mb-3 border border-[#D9A441]/30">
@@ -793,12 +875,21 @@ export default function Home({
               {panelsList.map((panel, idx) => (
                 <ScrollReveal
                   key={panel.number || idx}
-                  className={`bg-[#F7F5EF] rounded-2xl p-6 sm:p-7 border border-[#0E4B75]/15 hover:border-[#D9A441] hover:shadow-lg transition-all duration-300 ${
+                  className={`group relative bg-[#F7F5EF] rounded-2xl p-6 sm:p-7 border border-[#0E4B75]/15 hover:border-[#D9A441] shadow-sm hover:shadow-xl hover:shadow-[#D9A441]/10 transition-all duration-300 overflow-hidden hover:-translate-y-1 ${
                     idx === 4 ? 'md:col-span-2 md:max-w-2xl md:mx-auto w-full' : ''
                   }`}
                 >
-                  <div className="flex items-start gap-3.5">
-                    <span className="flex-shrink-0 w-8 h-8 bg-[#0E4B75] text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5 shadow-sm">
+                  {/* Corner Brackets */}
+                  <div className="card-decor-tl" />
+                  <div className="card-decor-tr" />
+                  <div className="card-decor-bl" />
+                  <div className="card-decor-br" />
+
+                  {/* Scan Line */}
+                  <div className="card-scan-line" />
+
+                  <div className="flex items-start gap-3.5 relative z-10">
+                    <span className="flex-shrink-0 w-8 h-8 bg-[#0E4B75] group-hover:bg-[#D9A441] group-hover:text-[#0A1E3F] text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5 shadow-sm transition-colors duration-300">
                       {idx + 1}
                     </span>
                     <div className="space-y-1">

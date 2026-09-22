@@ -198,7 +198,7 @@ export default function Navbar({ onOpenRegister, menuLabels = {} }) {
 
             <button
               onClick={() => onOpenRegister('delegate')}
-              className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-bold tracking-wider text-[#0A1E3F] rounded-xl group bg-gradient-to-br from-[#D9A441] via-[#F0D9A0] to-[#E04E78] shadow-lg shadow-[#D9A441]/20 hover:shadow-[#E04E78]/30 transition-all duration-300 transform hover:-translate-y-0.5"
+              className="btn-shimmer relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-bold tracking-wider text-[#0A1E3F] rounded-xl group bg-gradient-to-br from-[#D9A441] via-[#F0D9A0] to-[#E04E78] shadow-lg shadow-[#D9A441]/25 hover:shadow-[#D9A441]/40 transition-all duration-300 transform hover:-translate-y-0.5"
             >
               <span className="px-4 py-2 transition-all ease-in duration-75 bg-gradient-to-r from-[#D9A441] to-[#F0D9A0] rounded-[10px] flex items-center gap-1.5 font-bold uppercase text-[#0A1E3F]">
                 <Sparkles className="w-3.5 h-3.5 text-[#0A1E3F]" />

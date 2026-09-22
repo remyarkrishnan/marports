@@ -18,8 +18,17 @@ export default function SpeakerCard({ speaker, index = 0 }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="group bg-white rounded-3xl border border-[#0E4B75]/15 hover:border-[#D9A441] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+      className="group relative bg-white rounded-3xl border border-[#0E4B75]/15 hover:border-[#D9A441] overflow-hidden shadow-md hover:shadow-2xl hover:shadow-[#D9A441]/10 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1.5"
     >
+      {/* Corner Brackets */}
+      <div className="card-decor-tl" />
+      <div className="card-decor-tr" />
+      <div className="card-decor-bl" />
+      <div className="card-decor-br" />
+
+      {/* Laser Scan Line */}
+      <div className="card-scan-line" />
+
       <div>
         {/* Photograph */}
         <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-slate-100">
