@@ -91,9 +91,9 @@ export default function Navbar({ onOpenRegister, menuLabels = {} }) {
       href: '#topics',
       hasDropdown: true,
       subLinks: [
-        { name: 'Panelists', href: '#speakers-board' },
+        { name: 'Panel Members', href: '#speakers-board' },
         { name: 'Panel Topics', href: '#panels' },
-        { name: 'Panel chairs 2027', href: '#advisory-board' },
+        { name: 'Advisory Board 2027', href: '#advisory-board' },
       ],
     },
     { slug: 'awards', defaultName: 'Awards', href: '#awards' },

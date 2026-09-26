@@ -60,8 +60,7 @@ class AdminSponsorController extends Controller
             $file = $request->file('logo_file');
             $filename = 'sponsor_'.time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
 
-            // Direct path into public_html/new:
-            $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
+            $destinationPath = $this->getUploadDestinationPath();
 
             if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0755, true);
@@ -118,8 +117,7 @@ class AdminSponsorController extends Controller
             $file = $request->file('logo_file');
             $filename = 'sponsor_'.time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
 
-            // Direct path into public_html/new:
-            $destinationPath = '/home/marportsglobal/public_html/new/images/sponsors';
+            $destinationPath = $this->getUploadDestinationPath();
 
             if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0755, true);
@@ -127,13 +125,21 @@ class AdminSponsorController extends Controller
 
             $file->move($destinationPath, $filename);
             $updateData['logo'] = '/new/images/sponsors/'.$filename;
-        } elseif ($request->has('logo_url')) {
-            $updateData['logo'] = $validated['logo_url'] ?: null;
+        } elseif (! empty($validated['logo_url'])) {
+            $updateData['logo'] = $validated['logo_url'];
         }
 
         $sponsor->update($updateData);
 
         return back()->with('success', "Sponsor '{$sponsor->name}' updated successfully.");
+    }
+
+    /**
+     * Get the destination path for uploading sponsor images.
+     */
+    private function getUploadDestinationPath(): string
+    {
+        return public_path('new/images/sponsors');
     }
 
     /**

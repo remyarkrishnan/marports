@@ -81,7 +81,7 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
             STRATEGIC GOVERNANCE
           </span>
           <h2 className="font-serif-heading text-3xl sm:text-4xl font-extrabold text-[#0A1E3F] mb-4">
-            Panel chairs 2027
+            Advisory Board 2027
           </h2>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             Distinguished maritime captains, public sector leaders, naval architects, and port visionaries guiding the mission and technical agenda of MARPORTS GLOBAL.
@@ -134,7 +134,7 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0A1E3F]/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none" />
 
                     <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider text-[#F0D9A0] bg-[#0A1E3F]/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-[#D9A441]/40 shadow-sm">
-                      Panel Chair
+                      {member.role || 'Advisory Board'}
                     </span>
                   </div>
 

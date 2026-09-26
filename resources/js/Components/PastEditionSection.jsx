@@ -299,11 +299,11 @@ export default function PastEditionSection({ pastEdition }) {
           />
         </ScrollReveal>
 
-        {/* 2. Speakers & Panelists 2026 Horizontal Slider */}
+        {/* 2. Panelists & Moderators 2026 Horizontal Slider */}
         <ScrollReveal>
           <HorizontalSliderSection
-            title="Speakers & Panelists 2026"
-            badgeText="Speakers & Panelists 2026"
+            title="Panelists & Moderators 2026"
+            badgeText="Panelists & Moderators 2026"
             badgeIcon={Mic}
             countText={`${speakers2026.length}`}
             description="Eminent keynote speakers, maritime dignitaries, and panelists who delivered masterclasses and thought-provoking sessions."

@@ -67,8 +67,8 @@ export default function Footer({ eventDetails, onOpenRegister }) {
               <li><a href="#about" className="hover:text-[#D9A441] transition-colors">About Marports</a></li>
               <li><a href="#topics" className="hover:text-[#D9A441] transition-colors">Conference Topics</a></li>
               <li><a href="#panels" className="hover:text-[#D9A441] transition-colors">Key Panel Discussions</a></li>
-              <li><a href="#speakers-board" className="hover:text-[#D9A441] transition-colors">Panelists</a></li>
-              <li><a href="#advisory-board" className="hover:text-[#D9A441] transition-colors">Panel chairs 2027</a></li>
+              <li><a href="#speakers-board" className="hover:text-[#D9A441] transition-colors">Panel Members</a></li>
+              <li><a href="#advisory-board" className="hover:text-[#D9A441] transition-colors">Advisory Board 2027</a></li>
               <li><a href="#awards" className="hover:text-[#D9A441] transition-colors">Excellence Awards</a></li>
               <li><a href="#past-edition" className="hover:text-[#D9A441] transition-colors">2026 Highlights</a></li>
             </ul>

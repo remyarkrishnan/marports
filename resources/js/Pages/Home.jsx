@@ -383,8 +383,8 @@ export default function Home({
           target="_blank"
           rel="noopener noreferrer"
           className="absolute inset-0 w-full h-full overflow-hidden z-0 cursor-pointer group"
-          title="Watch video on YouTube"
-          aria-label="Watch MARPORTS GLOBAL video on YouTube"
+          title="Watch Inaugural Edition on YouTube"
+          aria-label="Watch Inaugural Edition of MARPORTS GLOBAL on YouTube"
         >
           <video
             ref={heroVideoRef}
@@ -407,7 +407,7 @@ export default function Home({
             <svg className="w-4 h-4 fill-current text-[#FF0000] group-hover:text-white transition-colors" viewBox="0 0 24 24">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
-            <span className="text-xs font-bold uppercase tracking-wider">Watch on YouTube</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Watch Inaugural Edition on YouTube</span>
           </div>
         </a>
 
@@ -948,7 +948,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* 10. Panelists */}
+      {/* 10. Panel Members */}
       <section id="speakers-board" className="py-24 bg-[#F7F5EF] relative overflow-hidden">
         <div id="speakers" className="scroll-mt-24" />
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
@@ -957,7 +957,7 @@ export default function Home({
               INDUSTRY THOUGHT LEADERS
             </span>
             <h2 className="font-serif-heading text-3xl sm:text-5xl font-extrabold text-[#0A1E3F] mb-4">
-              Panelists
+              Panel Members
             </h2>
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
               Hear directly from top operations directors, policy researchers, and commercial maritime innovators.

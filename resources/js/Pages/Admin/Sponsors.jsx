@@ -25,6 +25,7 @@ import {
   HelpCircle,
   ArrowUpDown,
 } from 'lucide-react';
+import { resolveAsset } from '../../utils/asset';
 
 export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = [] }) {
   const { flash } = usePage().props;
@@ -94,7 +95,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
   const openEditModal = (sponsor) => {
     setEditingSponsor(sponsor);
-    setLogoPreview(sponsor.logo || null);
+    setLogoPreview(sponsor.logo ? resolveAsset(sponsor.logo) : null);
     form.reset();
 
     const isCustom = !defaultTypes.includes(sponsor.type);
@@ -107,7 +108,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
       sort_order: sponsor.sort_order ?? 1,
       is_active: Boolean(sponsor.is_active),
       logo_file: null,
-      logo_url: sponsor.logo && !sponsor.logo.startsWith('/new/') ? sponsor.logo : '',
+      logo_url: sponsor.logo || '',
       remove_logo: false,
     });
     setModalOpen(true);
@@ -446,12 +447,12 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                             <div className="h-14 w-28 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2 overflow-hidden shadow-xs">
                               {sponsor.logo ? (
                                 <img
-                                  src={sponsor.logo}
+                                  src={resolveAsset(sponsor.logo)}
                                   alt={sponsor.name}
                                   className="max-h-full max-w-full object-contain"
                                   onError={(e) => {
                                     e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                                   }}
                                 />
                               ) : null}
@@ -594,7 +595,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                       <td className="py-3 px-4">
                         <div className="h-9 w-16 rounded bg-white p-1 flex items-center justify-center overflow-hidden border border-slate-200">
                           {sponsor.logo ? (
-                            <img src={sponsor.logo} alt={sponsor.name} className="max-h-full max-w-full object-contain" />
+                            <img src={resolveAsset(sponsor.logo)} alt={sponsor.name} className="max-h-full max-w-full object-contain" />
                           ) : (
                             <span className="text-[10px] font-bold text-slate-600">No logo</span>
                           )}
