@@ -243,7 +243,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                       <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
                         Associate Sponsors
                       </h3>
-                      <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                      <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
                         {row.map((s, idx) => {
                           const Wrapper = s.website_url ? 'a' : 'div';
                           return (
@@ -252,16 +252,18 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                               href={s.website_url || undefined}
                               target={s.website_url ? '_blank' : undefined}
                               rel={s.website_url ? 'noopener noreferrer' : undefined}
-                              className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-7 shadow-md bg-white w-full max-w-[280px] sm:max-w-[340px] h-36 sm:h-44 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl group"
+                              className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[290px] sm:max-w-[360px] md:max-w-[390px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
                             >
                               {s.logo ? (
-                                <img
-                                  src={resolveAsset(s.logo)}
-                                  alt={s.name}
-                                  className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                                />
+                                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
+                                  <img
+                                    src={resolveAsset(s.logo)}
+                                    alt={s.name}
+                                    className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                </div>
                               ) : (
-                                <span className="text-base font-bold text-[#0A1E3F] text-center">{s.name}</span>
+                                <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
                               )}
                             </Wrapper>
                           );
@@ -304,7 +306,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                       <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
                         Associate Sponsors
                       </h3>
-                      <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                      <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
                         {associateSponsors.map((s, idx) => {
                           const Wrapper = s.website_url ? 'a' : 'div';
                           return (
@@ -313,16 +315,18 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                               href={s.website_url || undefined}
                               target={s.website_url ? '_blank' : undefined}
                               rel={s.website_url ? 'noopener noreferrer' : undefined}
-                              className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-7 shadow-md bg-white w-full max-w-[280px] sm:max-w-[340px] h-36 sm:h-44 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl group"
+                              className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[290px] sm:max-w-[360px] md:max-w-[390px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
                             >
                               {s.logo ? (
-                                <img
-                                  src={resolveAsset(s.logo)}
-                                  alt={s.name}
-                                  className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                                />
+                                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
+                                  <img
+                                    src={resolveAsset(s.logo)}
+                                    alt={s.name}
+                                    className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                </div>
                               ) : (
-                                <span className="text-base font-bold text-[#0A1E3F] text-center">{s.name}</span>
+                                <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
                               )}
                             </Wrapper>
                           );
@@ -520,7 +524,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                     <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
                       Associate Sponsors
                     </h3>
-                    <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
                       {sponsors.associate.map((s, idx) => {
                         const Wrapper = s.website_url ? 'a' : 'div';
                         return (
@@ -529,16 +533,18 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                             href={s.website_url || undefined}
                             target={s.website_url ? '_blank' : undefined}
                             rel={s.website_url ? 'noopener noreferrer' : undefined}
-                            className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-7 shadow-md bg-white w-full max-w-[280px] sm:max-w-[340px] h-36 sm:h-44 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl group"
+                            className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[290px] sm:max-w-[360px] md:max-w-[390px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
                           >
                             {s.logo ? (
-                              <img
-                                src={resolveAsset(s.logo)}
-                                alt={s.name}
-                                className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                              />
+                              <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
+                                <img
+                                  src={resolveAsset(s.logo)}
+                                  alt={s.name}
+                                  className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                />
+                              </div>
                             ) : (
-                              <span className="text-base font-bold text-[#0A1E3F] text-center">{s.name}</span>
+                              <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
                             )}
                           </Wrapper>
                         );
