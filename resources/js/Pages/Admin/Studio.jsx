@@ -651,8 +651,8 @@ export default function Studio({
                           Subtitle & Focus
                         </label>
                         <textarea
-                          rows={2}
-                          defaultValue="A premium maritime forum for global leaders, port authorities, and industry innovators shaping the future of trade, sustainability and port excellence."
+                          rows={3}
+                          defaultValue="Where Global Maritime Leaders Connect, Collaborate & Create Opportunities&#10;&#10;A premium executive networking forum bringing together Shipbuilders • Shipowners • Ship Managers • Port Developers • Port Authorities • Terminal Operators • Dredging Leaders • Maritime Technology & Infrastructure Leaders."
                           onChange={(e) => handleSectionFieldChange('hero_subtitle', e.target.value)}
                           className="w-full px-3 py-1.5 rounded-lg bg-[#070E1B] border border-[#1E3A68] text-white text-xs focus:outline-none focus:border-[#22C55E]"
                         />

@@ -39,6 +39,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState(null);
+  const [targetRowTier, setTargetRowTier] = useState(null);
   const [deleteConfirmSponsor, setDeleteConfirmSponsor] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
 
@@ -74,17 +75,27 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     remove_logo: false,
   });
 
-  const openAddModal = () => {
+  const openAddModal = (targetSortOrder = null, suggestedType = null) => {
     setEditingSponsor(null);
     setLogoPreview(null);
     form.reset();
+
+    const order = targetSortOrder !== null
+      ? Number(targetSortOrder)
+      : (sponsors.length > 0 ? Math.max(...sponsors.map((s) => s.sort_order || 1)) + 1 : 1);
+
+    const typeToUse = suggestedType || (defaultTypes[0] || 'Registration Area Sponsor');
+    const isCustom = !defaultTypes.includes(typeToUse);
+
+    setTargetRowTier(targetSortOrder !== null ? Number(targetSortOrder) : null);
+
     form.setData({
-      type: 'Registration Area Sponsor',
-      custom_type: '',
+      type: isCustom ? 'CUSTOM' : typeToUse,
+      custom_type: isCustom ? typeToUse : '',
       name: '',
       description: '',
       website_url: '',
-      sort_order: sponsors.length > 0 ? Math.max(...sponsors.map((s) => s.sort_order || 1)) : 1,
+      sort_order: order,
       is_active: true,
       logo_file: null,
       logo_url: '',
@@ -95,6 +106,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
   const openEditModal = (sponsor) => {
     setEditingSponsor(sponsor);
+    setTargetRowTier(sponsor.sort_order ?? null);
     setLogoPreview(sponsor.logo ? resolveAsset(sponsor.logo) : null);
     form.reset();
 
@@ -426,6 +438,14 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                       <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded-full bg-[#112344] text-slate-300 border border-[#1E3A68]">
                         Sort Order: {sortOrder}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => openAddModal(sortOrder, sponsorList[0]?.type)}
+                        className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Sponsor to Row {sortOrder}</span>
+                      </button>
                     </div>
                   </div>
 
@@ -563,6 +583,23 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                         </div>
                       </div>
                     ))}
+
+                    {/* Quick Add Sponsor Card for this specific row */}
+                    <button
+                      type="button"
+                      onClick={() => openAddModal(sortOrder, sponsorList[0]?.type)}
+                      className="rounded-2xl border-2 border-dashed border-[#1E3A68] hover:border-purple-500 bg-[#070E1B]/40 hover:bg-purple-600/10 p-5 flex flex-col items-center justify-center text-center transition-all group min-h-[190px] cursor-pointer"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-purple-600/15 group-hover:bg-purple-600 text-purple-300 group-hover:text-white flex items-center justify-center mb-2.5 transition-all shadow-sm">
+                        <Plus className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-200 group-hover:text-white">
+                        + Add Sponsor
+                      </span>
+                      <span className="text-[10px] text-purple-400 font-mono mt-0.5">
+                        to Row #{sortOrder}
+                      </span>
+                    </button>
                   </div>
                 </div>
               ))
@@ -678,9 +715,17 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">
-                    {editingSponsor ? 'Edit Sponsor / Partner' : 'Add New Sponsor / Partner'}
+                    {editingSponsor
+                      ? 'Edit Sponsor / Partner'
+                      : targetRowTier
+                      ? `Add Sponsor to Row #${targetRowTier}`
+                      : 'Add New Sponsor / Partner'}
                   </h3>
-                  <p className="text-xs text-slate-400">Configure partner role, logo, and row placement</p>
+                  <p className="text-xs text-slate-400">
+                    {targetRowTier && !editingSponsor
+                      ? `New partner will be added directly into Row #${targetRowTier}`
+                      : 'Configure partner role, logo, and row placement'}
+                  </p>
                 </div>
               </div>
 
@@ -695,6 +740,18 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              {/* Row Tier Indicator */}
+              {targetRowTier && !editingSponsor && (
+                <div className="p-3 rounded-xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-between text-xs text-purple-200">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-purple-400" />
+                    <span>Adding to: <strong>Row #{targetRowTier} Tier</strong></span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-600/30 text-purple-200 border border-purple-400/30">
+                    Sort Order #{targetRowTier}
+                  </span>
+                </div>
+              )}
               {/* Type Selection */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">

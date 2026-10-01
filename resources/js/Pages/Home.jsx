@@ -368,7 +368,7 @@ export default function Home({
         <title>MARPORTS GLOBAL 2027 – Conference & Excellence Awards | Chennai, India</title>
         <meta
           name="description"
-          content="A premium maritime forum for global leaders, port authorities, and industry innovators shaping the future of trade, sustainability and port excellence. 5th February 2027, Taj Coromandel, Chennai."
+          content="Where Global Maritime Leaders Connect, Collaborate &amp; Create Opportunities. A premium executive networking forum bringing together Shipbuilders, Shipowners, Ship Managers, Port Developers, Port Authorities, Terminal Operators, Dredging Leaders, Maritime Technology &amp; Infrastructure Leaders. 5th February 2027, Taj Coromandel, Chennai."
         />
       </Head>
 
@@ -458,14 +458,19 @@ export default function Home({
               </motion.h1>
 
               {/* Supporting Description */}
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="text-base sm:text-lg text-white/95 max-w-2xl leading-relaxed font-normal drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+                className="space-y-3 max-w-3xl"
               >
-                A premium maritime forum for global leaders, port authorities, and industry innovators shaping the future of trade, sustainability and port excellence.
-              </motion.p>
+                <p className="text-lg sm:text-xl font-bold text-[#F0D9A0] tracking-wide leading-snug drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+                  Where Global Maritime Leaders Connect, Collaborate &amp; Create Opportunities
+                </p>
+                <p className="text-sm sm:text-base text-white/90 leading-relaxed font-normal drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                  A premium executive networking forum bringing together Shipbuilders • Shipowners • Ship Managers • Port Developers • Port Authorities • Terminal Operators • Dredging Leaders • Maritime Technology &amp; Infrastructure Leaders.
+                </p>
+              </motion.div>
 
               {/* Live Summit Countdown Timer */}
               <motion.div

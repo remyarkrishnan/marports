@@ -69,6 +69,14 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
       initials: 'SAS',
       image: '/images/advisory/DR.S.A.SANNASIRAJ.jpg',
     },
+    {
+      id: 9,
+      name: 'Sushil Mulchandani',
+      designation: 'Maritime & Ports Leader | Strategic Advisor',
+      company: 'Former CEO - JM Baxi Marine Services',
+      initials: 'SM',
+      image: '/images/advisory/SUSHIL_MULCHANDANI.jpeg',
+    },
   ];
 
   const members = advisoryBoard && advisoryBoard.length > 0 ? advisoryBoard : fallbackAdvisoryBoard;
@@ -88,7 +96,7 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
           </p>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {members.map((member, idx) => {
             const memberId = member.id || (idx + 1);
             const imageUrl = member.image ? resolveAsset(member.image) : null;

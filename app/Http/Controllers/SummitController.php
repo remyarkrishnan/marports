@@ -470,6 +470,16 @@ class SummitController extends Controller
                 'image' => '/images/advisory/DR.S.A.SANNASIRAJ.jpg',
                 'bio' => 'Dr. S. A. SANNASIRAJ is the Chair Professor of the Department of Ocean Engineering, IIT Madras. He coordinates the Centre of Excellence on Climate Change Impacts on coastal infrastructures & its adaptation strategies and National Technological Centre for Ports, Waterways and Coasts. He is the lead Asian coordinator of DAAD sponsored Global water and climate adaptation centre (ABCD Centre) in India and the vice-chair of executive council of Asia Pacific Division of IAHR. His area of specialization includes numerical wave modelling, structural rehabilitation, port and harbour structures, and coastal protection. He has more than 150 journal publications; 4 patents; co-authored 4 text books on coasts; successfully completed 12 major research projects & 300 industrial projects; and organized more than 25 workshops.',
             ],
+            [
+                'id' => 9,
+                'name' => 'Sushil Mulchandani',
+                'designation' => 'Maritime & Ports Leader | Strategic Advisor',
+                'company' => 'Former CEO - JM Baxi Marine Services',
+                'role' => 'Advisory Board',
+                'initials' => 'SM',
+                'image' => '/images/advisory/SUSHIL_MULCHANDANI.jpeg',
+                'bio' => "Sushil Mulchandani is a maritime and ports professional with over 35 years of leadership experience across ports, container terminals, shipping and marine services.\n\nDuring his long association with the J M Baxi Group, he held senior leadership positions including COO of Visakha Container Terminal Pvt. Ltd. and CEO of J.M. Baxi Marine Services. His experience spans port and terminal operations, business strategy, commercial development, customer engagement, business transformation and organisational leadership.\n\nHe is currently engaged selectively as a strategic advisor and consultant to organisations across the maritime ecosystem, with a focus on business growth, market entry, ports and marine services, new business development and transformation. He also contributes to maritime education through industry-focused academic engagements and guest lectures.\n\nSushil brings a strong practitioner’s perspective and extensive industry experience to his role as Advisory Board Member, MARPORTS Global 2027, supporting meaningful industry dialogue, collaboration and knowledge sharing.",
+            ],
         ];
     }
 
