@@ -9,6 +9,11 @@
     <meta name="description" content="MARPORTS GLOBAL 2027 is the premier international technology summit bringing together maritime pioneers, autonomous logistics innovators, supply chain leaders, and deeptech AI visionaries.">
     <meta name="keywords" content="MARPORTS GLOBAL, Maritime Tech, Port Automation, Logistics AI, DeepTech Summit 2027, Maritime Autonomous Navigation, Green Ports, Supply Chain Tech">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
