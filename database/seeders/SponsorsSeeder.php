@@ -24,13 +24,22 @@ class SponsorsSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Tier 2: Registration Area Sponsor (sort_order: 2)
+            // Tier 2: Registration Area Sponsor & Badge and Lanyard Sponsor (sort_order: 2 -> appear together in row 2)
             [
                 'name' => 'Mazagon Dock Shipbuilders Limited',
                 'type' => 'Registration Area Sponsor',
                 'description' => 'Lead Maritime Partner & Registration Area Sponsor',
                 'logo' => '/new/images/sponsors/mazagon-dock-logo.jpg',
                 'website_url' => 'https://mazagondock.in/',
+                'sort_order' => 2,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Algihaz Marine Contractors',
+                'type' => 'Badge and Lanyard Sponsor',
+                'description' => 'Badge and Lanyard Sponsor',
+                'logo' => '/new/images/sponsors/algihaz-logo.png',
+                'website_url' => 'https://algihazmarine.com/',
                 'sort_order' => 2,
                 'is_active' => true,
             ],

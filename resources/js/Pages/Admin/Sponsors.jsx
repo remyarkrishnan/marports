@@ -52,6 +52,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     'Promoting Organisation',
     'Lead Maritime Partner',
     'Badge & Lanyard Sponsor',
+    'Badge and Lanyard Sponsor',
     'Gala Dinner Sponsor',
     'Technology Partner',
   ];

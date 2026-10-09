@@ -144,6 +144,9 @@ class SummitController extends Controller
                 'registration' => [
                     ['name' => 'Mazagon Dock Shipbuilders Limited', 'role' => 'Registration Area Sponsor', 'tag' => 'MDSL', 'logo' => '/new/images/sponsors/mazagon-dock-logo.jpg', 'website_url' => 'https://mazagondock.in/'],
                 ],
+                'badge_lanyard' => [
+                    ['name' => 'Algihaz Marine Contractors', 'role' => 'Badge and Lanyard Sponsor', 'tag' => 'AMC', 'logo' => '/new/images/sponsors/algihaz-logo.png', 'website_url' => 'https://algihazmarine.com/'],
+                ],
                 'lunch_coffee' => [
                     ['name' => 'ABS Marine Services Ltd', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'ABS', 'logo' => '/new/images/sponsors/abs-marine-services-logo.jpg', 'website_url' => 'https://absmarine.com/'],
                     ['name' => 'GRSE (Garden Reach Shipbuilders & Engineers)', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'GRSE', 'logo' => '/new/images/sponsors/grse-logo.jpg', 'website_url' => 'https://grse.in/'],
@@ -169,6 +172,7 @@ class SummitController extends Controller
         // Participating Organizations
         $participatingOrganizations = [
             'Mazagon Dock Shipbuilders Limited',
+            'Algihaz Marine Contractors',
             'Garden Reach Shipbuilders & Engineers (GRSE)',
             'Port of Rotterdam Authority',
             'Larsen & Toubro (L&T Heavy Civil Infrastructure)',

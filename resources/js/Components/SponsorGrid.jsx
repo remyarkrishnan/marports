@@ -17,13 +17,13 @@ function SingleSponsorCard({ sponsor, size = 'default', isRegistrationArea = fal
       }
     : {};
 
-  const isRegistration = isRegistrationArea || (sponsor.type && (/registration/i.test(sponsor.type) || /premier/i.test(sponsor.type)));
+  const isRegistration = isRegistrationArea || (sponsor.type && (/registration/i.test(sponsor.type) || /premier/i.test(sponsor.type) || /badge/i.test(sponsor.type) || /lanyard/i.test(sponsor.type)));
 
   if (isRegistration) {
     return (
       <CardWrapper
         {...wrapperProps}
-        className="block p-8 sm:p-10 rounded-2xl bg-white border-2 border-[#D9A441] shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center"
+        className="block p-8 sm:p-10 rounded-2xl bg-white border-2 border-[#D9A441] shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9A441]/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#0E4B75]/5 rounded-full blur-2xl pointer-events-none" />
@@ -32,9 +32,9 @@ function SingleSponsorCard({ sponsor, size = 'default', isRegistrationArea = fal
           {hasLogo ? (
             <img
               src={resolveAsset(sponsor.logo)}
-              alt={sponsor.name || 'Premier Sponsor'}
+              alt={sponsor.name || 'Sponsor'}
               onError={() => setImgFailed(true)}
-              className="max-h-28 sm:max-h-36 md:max-h-44 max-w-[280px] sm:max-w-[400px] md:max-w-[480px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="max-h-28 sm:max-h-36 md:max-h-40 max-w-[280px] sm:max-w-[380px] md:max-w-[440px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="text-xl font-serif-heading font-bold text-[#0A1E3F]">
@@ -177,6 +177,68 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
           {isDynamicRows ? (
             sponsors.map((row, rowIdx) => {
               if (!Array.isArray(row) || row.length === 0) return null;
+
+              // Check if row has Registration Area Sponsor AND Badge & Lanyard Sponsor (Registration on Left, Badge & Lanyard on Right)
+              const regAreaSponsors = row.filter((s) => /registration/i.test(s.type));
+              const badgeLanyardSponsors = row.filter((s) => /badge|lanyard/i.test(s.type));
+              const otherInRegRow = row.filter((s) => !/registration/i.test(s.type) && !/badge|lanyard/i.test(s.type));
+              const isRegAndBadgeRow = regAreaSponsors.length > 0 && badgeLanyardSponsors.length > 0;
+
+              if (isRegAndBadgeRow) {
+                return (
+                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
+                      {/* Left: Registration Area Sponsor */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-center mb-4">
+                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
+                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                            {regAreaSponsors.length > 1 ? 'Registration Area Sponsors' : (regAreaSponsors[0]?.type || 'Registration Area Sponsor')}
+                          </span>
+                        </div>
+                        <div className="w-full flex-1 flex flex-col justify-center">
+                          {regAreaSponsors.map((s, idx) => (
+                            <SingleSponsorCard
+                              key={s.id || idx}
+                              sponsor={s}
+                              size="featured"
+                              isRegistrationArea={true}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right: Badge and Lanyard Sponsor */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-center mb-4">
+                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
+                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                            {badgeLanyardSponsors.length > 1 ? 'Badge & Lanyard Sponsors' : (badgeLanyardSponsors[0]?.type || 'Badge & Lanyard Sponsor')}
+                          </span>
+                        </div>
+                        <div className="w-full flex-1 flex flex-col justify-center">
+                          {badgeLanyardSponsors.map((s, idx) => (
+                            <SingleSponsorCard
+                              key={s.id || idx}
+                              sponsor={s}
+                              size="featured"
+                              isRegistrationArea={true}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {otherInRegRow.length > 0 && (
+                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-5xl mx-auto">
+                        {otherInRegRow.map((s, idx) => (
+                          <SingleSponsorCard key={s.id || idx} sponsor={s} size="featured" />
+                        ))}
+                      </div>
+                    )}
+                  </ScrollReveal>
+                );
+              }
 
               // Check if row has both Lunch & Coffee Sponsors AND Table Top Sponsor (as in user pic)
               const lunchCoffeeSponsors = row.filter((s) => /lunch/i.test(s.type));
@@ -413,18 +475,18 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 ? (count > 1 && !commonType.endsWith('s') && !commonType.endsWith('S')
                     ? `${commonType}s`
                     : commonType)
-                : (count > 1 ? 'Partners & Sponsors' : 'Partner / Sponsor');
+                : null;
 
               return (
                 <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
                   {displayBadge && (
                     <div className="text-center mb-5">
                       <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
-                        commonType && (/registration/i.test(commonType) || /premier/i.test(commonType))
+                        commonType && (/registration/i.test(commonType) || /premier/i.test(commonType) || /badge|lanyard/i.test(commonType))
                           ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
                           : 'text-[#0E4B75] bg-[#0E4B75]/10 border-[#0E4B75]/20'
                       }`}>
-                        {count === 1 || (commonType && (/registration/i.test(commonType) || /premier/i.test(commonType))) ? (
+                        {count === 1 || (commonType && (/registration/i.test(commonType) || /premier/i.test(commonType) || /badge|lanyard/i.test(commonType))) ? (
                           <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
                         ) : (
                           <Award className="w-3.5 h-3.5 text-[#0E4B75]" />
@@ -440,16 +502,39 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                       <SingleSponsorCard
                         sponsor={row[0]}
                         size="featured"
-                        isRegistrationArea={Boolean(commonType && (/registration/i.test(commonType) || /premier/i.test(commonType)))}
+                        isRegistrationArea={Boolean(commonType && (/registration/i.test(commonType) || /premier/i.test(commonType) || /badge|lanyard/i.test(commonType)))}
                       />
                     </div>
                   )}
 
                   {count === 2 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-                      {row.map((s, idx) => (
-                        <SingleSponsorCard key={s.id || idx} sponsor={s} size="default" />
-                      ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
+                      {row.map((s, idx) => {
+                        const isFeaturedTier = s.type && (/registration/i.test(s.type) || /premier/i.test(s.type) || /badge|lanyard/i.test(s.type));
+                        return (
+                          <div key={s.id || idx} className="flex flex-col items-center">
+                            {!commonType && s.type && (
+                              <div className="text-center mb-4">
+                                <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
+                                  isFeaturedTier
+                                    ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
+                                    : 'text-[#0E4B75] bg-[#0E4B75]/10 border-[#0E4B75]/20'
+                                }`}>
+                                  {isFeaturedTier ? (
+                                    <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                                  ) : (
+                                    <Award className="w-3.5 h-3.5 text-[#0E4B75]" />
+                                  )}
+                                  {s.type}
+                                </span>
+                              </div>
+                            )}
+                            <div className="w-full flex-1 flex flex-col justify-center">
+                              <SingleSponsorCard sponsor={s} size={isFeaturedTier ? 'featured' : 'default'} isRegistrationArea={isFeaturedTier} />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -501,21 +586,53 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 </ScrollReveal>
               )}
 
-              {sponsors?.registration && sponsors.registration.length > 0 && (
-                <ScrollReveal className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-4 px-4 py-1 bg-[#D9A441]/20 border border-[#D9A441]/50 rounded-full text-xs font-bold uppercase tracking-wider text-[#0A1E3F]">
-                    <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                    Registration Area Sponsor
-                  </div>
-                  <div className="max-w-xl mx-auto">
-                    {sponsors.registration.map((s, idx) => (
-                      <SingleSponsorCard
-                        key={idx}
-                        sponsor={{ name: s.name, type: s.role, logo: s.logo, website_url: s.website_url }}
-                        size="featured"
-                        isRegistrationArea={true}
-                      />
-                    ))}
+              {/* Registration Area Sponsor & Badge and Lanyard Sponsor Fallback */}
+              {((sponsors?.registration && sponsors.registration.length > 0) || (sponsors?.badge_lanyard && sponsors.badge_lanyard.length > 0)) && (
+                <ScrollReveal className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
+                    {/* Left: Registration Area Sponsor */}
+                    {sponsors?.registration && sponsors.registration.length > 0 && (
+                      <div className="flex flex-col items-center">
+                        <div className="text-center mb-4">
+                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
+                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                            Registration Area Sponsor
+                          </span>
+                        </div>
+                        <div className="w-full flex-1 flex flex-col justify-center">
+                          {sponsors.registration.map((s, idx) => (
+                            <SingleSponsorCard
+                              key={idx}
+                              sponsor={{ name: s.name, type: s.role, logo: s.logo, website_url: s.website_url }}
+                              size="featured"
+                              isRegistrationArea={true}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Right: Badge and Lanyard Sponsor */}
+                    {sponsors?.badge_lanyard && sponsors.badge_lanyard.length > 0 && (
+                      <div className="flex flex-col items-center">
+                        <div className="text-center mb-4">
+                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
+                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                            Badge and Lanyard Sponsor
+                          </span>
+                        </div>
+                        <div className="w-full flex-1 flex flex-col justify-center">
+                          {sponsors.badge_lanyard.map((s, idx) => (
+                            <SingleSponsorCard
+                              key={idx}
+                              sponsor={{ name: s.name, type: s.role, logo: s.logo, website_url: s.website_url }}
+                              size="featured"
+                              isRegistrationArea={true}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </ScrollReveal>
               )}
