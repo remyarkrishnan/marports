@@ -92,6 +92,7 @@ Route::get('/run-seeders', function () {
     try {
         $seeders = [
             'SponsorsSeeder',
+            'BadgeAndLanyardSponsorSeeder',
         ];
 
         $output = '';
@@ -106,5 +107,18 @@ Route::get('/run-seeders', function () {
         return '<h3>Seeders Executed Successfully:</h3>'.$output;
     } catch (Exception $e) {
         return '<h3>Error running seeders:</h3>'.$e->getMessage();
+    }
+});
+
+Route::get('/seed-badge-sponsor', function () {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'BadgeAndLanyardSponsorSeeder',
+            '--force' => true,
+        ]);
+
+        return '<h3>Badge & Lanyard Sponsor Seeded Successfully:</h3><pre>'.Artisan::output().'</pre>';
+    } catch (Exception $e) {
+        return '<h3>Error running seeder:</h3>'.$e->getMessage();
     }
 });
