@@ -44,7 +44,7 @@ class SponsorsSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Tier 3: Lunch & Coffee Sponsors and Table Top Sponsor (sort_order: 3 -> appear together in the same row)
+            // Tier 3: Lunch & Coffee Sponsors (sort_order: 3)
             [
                 'name' => 'ABS Marine Services Ltd',
                 'type' => 'Lunch & Coffee Sponsor',
@@ -63,24 +63,26 @@ class SponsorsSeeder extends Seeder
                 'sort_order' => 3,
                 'is_active' => true,
             ],
+
+            // Tier 4: Table Top Sponsor (sort_order: 4 -> row below Lunch & Coffee Sponsors)
             [
                 'name' => 'Nirmon Marine & Offshore Design Pvt Ltd',
                 'type' => 'Table Top Sponsor',
                 'description' => 'Specialized Naval Architecture & Offshore Design',
                 'logo' => '/new/images/sponsors/nirmon-marine-logo.jpg',
                 'website_url' => 'https://www.nirmondesign.com/',
-                'sort_order' => 3,
+                'sort_order' => 4,
                 'is_active' => true,
             ],
 
-            // Tier 4: Associate Sponsors (sort_order: 4 -> appear together in the same row)
+            // Tier 5: Associate Sponsors (sort_order: 5)
             [
                 'name' => 'KNK Ship Management',
                 'type' => 'Associate Sponsor',
                 'description' => 'Global Fleet Manning, Ship Technical & Crew Management',
                 'logo' => '/new/images/sponsors/knk-ship-management-logo.jpg',
                 'website_url' => 'https://knkshipping.co.in/',
-                'sort_order' => 4,
+                'sort_order' => 5,
                 'is_active' => true,
             ],
             [
@@ -89,18 +91,18 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Commercial Advisory & Marine Engineering Solutions',
                 'logo' => '/new/images/sponsors/core-axis-maritime-logo.jpg',
                 'website_url' => 'https://coreaxismaritime.com/',
-                'sort_order' => 4,
+                'sort_order' => 5,
                 'is_active' => true,
             ],
 
-            // Tier 5: Promoting Organisations (sort_order: 5 -> all consolidated under PROMOTING ORGANISATIONS)
+            // Tier 6: Promoting Organisations (sort_order: 6 -> all consolidated under PROMOTING ORGANISATIONS)
             [
                 'name' => 'Port of Rotterdam',
                 'type' => 'Promoting Organisation',
                 'description' => 'Global Maritime Hub & Clean Energy Pioneer',
                 'logo' => '/new/images/sponsors/port-of-rotterdam-logo.png',
                 'website_url' => 'https://www.portofrotterdam.com/en',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
             [
@@ -109,7 +111,7 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Professional Commercial Shipping Education & Fellowship',
                 'logo' => '/new/images/sponsors/ics-madras-logo.jpg',
                 'website_url' => 'https://www.ics.org.uk/',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
             [
@@ -118,7 +120,7 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Apex Association of Indian Shipping Lines',
                 'logo' => '/new/images/sponsors/insa-logo.jpg',
                 'website_url' => 'https://www.insa.org.in/',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
             [
@@ -127,7 +129,7 @@ class SponsorsSeeder extends Seeder
                 'description' => 'National Shipyard Representation & Industrial Council',
                 'logo' => '/new/images/sponsors/sai-logo.jpg',
                 'website_url' => 'https://www.shipyardsassociationofindia.com/',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
             [
@@ -136,7 +138,7 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Representing Shipowners across the Asian Region',
                 'logo' => '/new/images/sponsors/asa-logo.png',
                 'website_url' => 'https://asianshipowners.org/',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
             [
@@ -145,7 +147,7 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Technical Guidance & Naval Architecture Excellence',
                 'logo' => '/new/images/sponsors/ina-logo.jpg',
                 'website_url' => 'https://inaindia.co.in/',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
             ],
         ];

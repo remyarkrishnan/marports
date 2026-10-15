@@ -240,7 +240,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 );
               }
 
-              // Check if row has both Lunch & Coffee Sponsors AND Table Top Sponsor (as in user pic)
+              // Check if row has both Lunch & Coffee Sponsors AND Table Top Sponsor
               const lunchCoffeeSponsors = row.filter((s) => /lunch/i.test(s.type));
               const tableTopSponsors = row.filter((s) => /table\s*top/i.test(s.type));
               const otherInLunchRow = row.filter((s) => !/lunch/i.test(s.type) && !/table\s*top/i.test(s.type));
@@ -248,77 +248,87 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
 
               if (isLunchAndTableTopRow) {
                 return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto items-stretch">
-                      {/* Left: Lunch & Coffee Sponsors */}
-                      <div className="flex flex-col">
-                        <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                          {lunchCoffeeSponsors.length > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor'}
-                        </h3>
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex-1 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
-                          {lunchCoffeeSponsors.map((s, idx) => {
-                            const Wrapper = s.website_url ? 'a' : 'div';
-                            return (
-                              <Wrapper
-                                key={s.id || idx}
-                                href={s.website_url || undefined}
-                                target={s.website_url ? '_blank' : undefined}
-                                rel={s.website_url ? 'noopener noreferrer' : undefined}
-                                className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[270px] sm:max-w-[320px] md:max-w-[350px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
-                              >
-                                {s.logo ? (
-                                  <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
-                                    <img
-                                      src={resolveAsset(s.logo)}
-                                      alt={s.name}
-                                      className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                  </div>
-                                ) : (
-                                  <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
-                                )}
-                              </Wrapper>
-                            );
-                          })}
-                        </div>
+                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-12">
+                    {/* Lunch & Coffee Sponsors */}
+                    <div className="max-w-5xl mx-auto">
+                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
+                        {lunchCoffeeSponsors.length > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor'}
+                      </h3>
+                      <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                        {lunchCoffeeSponsors.map((s, idx) => {
+                          const count = lunchCoffeeSponsors.length;
+                          const cardWidthClass = count === 1
+                            ? 'max-w-[340px] sm:max-w-[420px]'
+                            : count === 2
+                            ? 'max-w-[290px] sm:max-w-[360px] md:max-w-[390px]'
+                            : 'max-w-[260px] sm:max-w-[310px] md:max-w-[330px]';
+                          const Wrapper = s.website_url ? 'a' : 'div';
+                          return (
+                            <Wrapper
+                              key={s.id || idx}
+                              href={s.website_url || undefined}
+                              target={s.website_url ? '_blank' : undefined}
+                              rel={s.website_url ? 'noopener noreferrer' : undefined}
+                              className={`rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full ${cardWidthClass} h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group`}
+                            >
+                              {s.logo ? (
+                                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
+                                  <img
+                                    src={resolveAsset(s.logo)}
+                                    alt={s.name}
+                                    className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                </div>
+                              ) : (
+                                <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
+                              )}
+                            </Wrapper>
+                          );
+                        })}
                       </div>
+                    </div>
 
-                      {/* Right: Table Top Sponsor */}
-                      <div className="flex flex-col">
-                        <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                          {tableTopSponsors.length > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor'}
-                        </h3>
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex-1 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
-                          {tableTopSponsors.map((s, idx) => {
-                            const Wrapper = s.website_url ? 'a' : 'div';
-                            return (
-                              <Wrapper
-                                key={s.id || idx}
-                                href={s.website_url || undefined}
-                                target={s.website_url ? '_blank' : undefined}
-                                rel={s.website_url ? 'noopener noreferrer' : undefined}
-                                className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[290px] sm:max-w-[360px] md:max-w-[390px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
-                              >
-                                {s.logo ? (
-                                  <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
-                                    <img
-                                      src={resolveAsset(s.logo)}
-                                      alt={s.name}
-                                      className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                  </div>
-                                ) : (
-                                  <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
-                                )}
-                              </Wrapper>
-                            );
-                          })}
-                        </div>
+                    {/* Table Top Sponsor */}
+                    <div className="max-w-5xl mx-auto">
+                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
+                        {tableTopSponsors.length > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor'}
+                      </h3>
+                      <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                        {tableTopSponsors.map((s, idx) => {
+                          const count = tableTopSponsors.length;
+                          const cardWidthClass = count === 1
+                            ? 'max-w-[340px] sm:max-w-[420px]'
+                            : count === 2
+                            ? 'max-w-[290px] sm:max-w-[360px] md:max-w-[390px]'
+                            : 'max-w-[260px] sm:max-w-[310px] md:max-w-[330px]';
+                          const Wrapper = s.website_url ? 'a' : 'div';
+                          return (
+                            <Wrapper
+                              key={s.id || idx}
+                              href={s.website_url || undefined}
+                              target={s.website_url ? '_blank' : undefined}
+                              rel={s.website_url ? 'noopener noreferrer' : undefined}
+                              className={`rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full ${cardWidthClass} h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group`}
+                            >
+                              {s.logo ? (
+                                <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
+                                  <img
+                                    src={resolveAsset(s.logo)}
+                                    alt={s.name}
+                                    className="max-h-[115px] sm:max-h-[135px] max-w-[240px] sm:max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                </div>
+                              ) : (
+                                <span className="text-base sm:text-lg font-bold text-[#0A1E3F] text-center">{s.name}</span>
+                              )}
+                            </Wrapper>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {otherInLunchRow.length > 0 && (
-                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-7xl mx-auto">
+                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-5xl mx-auto">
                         {otherInLunchRow.map((s, idx) => (
                           <SingleSponsorCard key={s.id || idx} sponsor={s} size="default" />
                         ))}
@@ -328,13 +338,16 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 );
               }
 
-              // Check if row is purely Associate Sponsors or purely Lunch & Coffee Sponsors
+              // Check if row is purely Associate Sponsors, Lunch & Coffee Sponsors, or Table Top Sponsors
               const isAssociateRow = row.length > 0 && row.every((s) => /associate/i.test(s.type));
               const isPureLunchRow = row.length > 0 && row.every((s) => /lunch/i.test(s.type));
-              if (isAssociateRow || isPureLunchRow) {
+              const isPureTableTopRow = row.length > 0 && row.every((s) => /table\s*top/i.test(s.type));
+              if (isAssociateRow || isPureLunchRow || isPureTableTopRow) {
                 const count = row.length;
                 const rowTitle = isPureLunchRow
                   ? (count > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor')
+                  : isPureTableTopRow
+                  ? (count > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor')
                   : (count > 1 ? 'Associate Sponsors' : 'Associate Sponsor');
                 const cardWidthClass = count === 1
                   ? 'max-w-[340px] sm:max-w-[420px]'
@@ -637,15 +650,21 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 </ScrollReveal>
               )}
 
-              {/* Combined Lunch & Coffee + Table Top Fallback */}
-              <ScrollReveal>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto items-stretch">
-                  <div className="flex flex-col">
+              {/* Lunch & Coffee Sponsors Fallback */}
+              {sponsors?.lunch_coffee && sponsors.lunch_coffee.length > 0 && (
+                <ScrollReveal className="space-y-4">
+                  <div className="max-w-5xl mx-auto">
                     <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                      Lunch & Coffee Sponsors
+                      {sponsors.lunch_coffee.length > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor'}
                     </h3>
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex-1 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
-                      {(sponsors?.lunch_coffee || []).map((s, idx) => {
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                      {sponsors.lunch_coffee.map((s, idx) => {
+                        const count = sponsors.lunch_coffee.length;
+                        const cardWidthClass = count === 1
+                          ? 'max-w-[340px] sm:max-w-[420px]'
+                          : count === 2
+                          ? 'max-w-[290px] sm:max-w-[360px] md:max-w-[390px]'
+                          : 'max-w-[260px] sm:max-w-[310px] md:max-w-[330px]';
                         const Wrapper = s.website_url ? 'a' : 'div';
                         return (
                           <Wrapper
@@ -653,7 +672,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                             href={s.website_url || undefined}
                             target={s.website_url ? '_blank' : undefined}
                             rel={s.website_url ? 'noopener noreferrer' : undefined}
-                            className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[270px] sm:max-w-[320px] md:max-w-[350px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
+                            className={`rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full ${cardWidthClass} h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group`}
                           >
                             <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
                               <img
@@ -667,13 +686,24 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                       })}
                     </div>
                   </div>
+                </ScrollReveal>
+              )}
 
-                  <div className="flex flex-col">
+              {/* Table Top Sponsor Fallback */}
+              {sponsors?.table_top && sponsors.table_top.length > 0 && (
+                <ScrollReveal className="space-y-4">
+                  <div className="max-w-5xl mx-auto">
                     <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                      Table Top Sponsor
+                      {sponsors.table_top.length > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor'}
                     </h3>
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex-1 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
-                      {(sponsors?.table_top || []).map((s, idx) => {
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-9 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6 sm:gap-8 min-h-[220px]">
+                      {sponsors.table_top.map((s, idx) => {
+                        const count = sponsors.table_top.length;
+                        const cardWidthClass = count === 1
+                          ? 'max-w-[340px] sm:max-w-[420px]'
+                          : count === 2
+                          ? 'max-w-[290px] sm:max-w-[360px] md:max-w-[390px]'
+                          : 'max-w-[260px] sm:max-w-[310px] md:max-w-[330px]';
                         const Wrapper = s.website_url ? 'a' : 'div';
                         return (
                           <Wrapper
@@ -681,7 +711,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                             href={s.website_url || undefined}
                             target={s.website_url ? '_blank' : undefined}
                             rel={s.website_url ? 'noopener noreferrer' : undefined}
-                            className="rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full max-w-[290px] sm:max-w-[360px] md:max-w-[390px] h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
+                            className={`rounded-2xl sm:rounded-3xl border-2 border-[#1D63ED] p-5 sm:p-6 shadow-md hover:shadow-xl bg-white w-full ${cardWidthClass} h-40 sm:h-48 flex items-center justify-center transition-all duration-300 hover:scale-105 group`}
                           >
                             <div className="w-full h-full flex items-center justify-center p-1.5 sm:p-2">
                               <img
@@ -695,8 +725,8 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                       })}
                     </div>
                   </div>
-                </div>
-              </ScrollReveal>
+                </ScrollReveal>
+              )}
 
               {/* Associate Sponsors Fallback */}
               {sponsors?.associate && sponsors.associate.length > 0 && (
