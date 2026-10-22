@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Sponsor;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SponsorManagementTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     public function test_admin_can_view_sponsors_list(): void
     {
@@ -29,8 +29,8 @@ class SponsorManagementTest extends TestCase
     {
         $user = User::first() ?? User::factory()->create();
 
-        $response = $this->actingAs($user)->post(route('admin.sponsors.store'), [
-            'type' => 'Diamond Sponsor',
+        $response = $this->actingAs($user)->from(route('admin.sponsors'))->post(route('admin.sponsors.store'), [
+            'type' => 'Strategic Partner',
             'name' => 'Global Maritime Logistics',
             'description' => 'World class logistics provider',
             'website_url' => 'https://example.com',
@@ -41,7 +41,7 @@ class SponsorManagementTest extends TestCase
         $response->assertRedirect(route('admin.sponsors'));
         $this->assertDatabaseHas('sponsors', [
             'name' => 'Global Maritime Logistics',
-            'type' => 'Diamond Sponsor',
+            'type' => 'Strategic Partner',
             'sort_order' => 1,
             'is_active' => 1,
         ]);
@@ -50,9 +50,14 @@ class SponsorManagementTest extends TestCase
     public function test_admin_can_update_sponsor(): void
     {
         $user = User::first() ?? User::factory()->create();
-        $sponsor = Sponsor::first();
+        $sponsor = Sponsor::first() ?? Sponsor::create([
+            'name' => 'Initial Name Ltd',
+            'type' => 'Strategic Partner',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
 
-        $response = $this->actingAs($user)->post(route('admin.sponsors.update', $sponsor), [
+        $response = $this->actingAs($user)->from(route('admin.sponsors'))->post(route('admin.sponsors.update', $sponsor), [
             'type' => 'Updated Category',
             'name' => 'Updated Name Ltd',
             'description' => 'Updated description test',
@@ -72,7 +77,12 @@ class SponsorManagementTest extends TestCase
     public function test_admin_can_toggle_sponsor_active_status(): void
     {
         $user = User::first() ?? User::factory()->create();
-        $sponsor = Sponsor::first();
+        $sponsor = Sponsor::first() ?? Sponsor::create([
+            'name' => 'Toggle Name Ltd',
+            'type' => 'Strategic Partner',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
         $initialStatus = $sponsor->is_active;
 
         $response = $this->actingAs($user)->post(route('admin.sponsors.toggle_active', $sponsor));
@@ -94,7 +104,7 @@ class SponsorManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->actingAs($user)->delete(route('admin.sponsors.destroy', $sponsor));
+        $response = $this->actingAs($user)->from(route('admin.sponsors'))->delete(route('admin.sponsors.destroy', $sponsor));
 
         $response->assertRedirect(route('admin.sponsors'));
         $this->assertDatabaseMissing('sponsors', [

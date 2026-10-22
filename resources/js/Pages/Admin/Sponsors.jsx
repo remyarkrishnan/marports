@@ -45,6 +45,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
   // Common preset sponsor types
   const defaultTypes = [
+    'Strategic Partner',
     'Registration Area Sponsor',
     'Lunch & Coffee Sponsor',
     'Table Top Sponsor',

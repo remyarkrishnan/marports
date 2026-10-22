@@ -17,7 +17,35 @@ function SingleSponsorCard({ sponsor, size = 'default', isRegistrationArea = fal
       }
     : {};
 
+  const isStrategic = sponsor.type && /strategic/i.test(sponsor.type);
   const isRegistration = isRegistrationArea || (sponsor.type && (/registration/i.test(sponsor.type) || /premier/i.test(sponsor.type) || /badge/i.test(sponsor.type) || /lanyard/i.test(sponsor.type)));
+
+  if (isStrategic) {
+    return (
+      <CardWrapper
+        {...wrapperProps}
+        className="block p-8 sm:p-10 md:p-12 rounded-3xl bg-white border-2 border-[#D9A441] shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
+      >
+        <div className="absolute top-0 right-0 w-44 h-44 bg-[#D9A441]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-44 h-44 bg-[#0E4B75]/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="min-h-[160px] sm:min-h-[200px] md:min-h-[240px] flex items-center justify-center py-2">
+          {hasLogo ? (
+            <img
+              src={resolveAsset(sponsor.logo)}
+              alt={sponsor.name || 'Strategic Partner'}
+              onError={() => setImgFailed(true)}
+              className="max-h-36 sm:max-h-48 md:max-h-56 max-w-[280px] sm:max-w-[420px] md:max-w-[480px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="text-2xl font-serif-heading font-extrabold text-[#0A1E3F]">
+              {sponsor.name}
+            </div>
+          )}
+        </div>
+      </CardWrapper>
+    );
+  }
 
   if (isRegistration) {
     return (
@@ -177,6 +205,34 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
           {isDynamicRows ? (
             sponsors.map((row, rowIdx) => {
               if (!Array.isArray(row) || row.length === 0) return null;
+
+              // Check if row is Strategic Partner (rendered with top distinction)
+              const isStrategicRow = row.length > 0 && row.every((s) => /strategic/i.test(s.type));
+              if (isStrategicRow) {
+                const count = row.length;
+                const title = count > 1 ? 'Strategic Partners' : 'Strategic Partner';
+                return (
+                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
+                    <div className="text-center mb-5">
+                      <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest px-5 py-2 rounded-full border shadow-sm text-[#0A1E3F] bg-gradient-to-r from-[#D9A441]/20 via-[#D9A441]/30 to-[#D9A441]/20 border-[#D9A441]">
+                        <Sparkles className="w-4 h-4 text-[#D9A441]" />
+                        {title}
+                      </span>
+                    </div>
+
+                    <div className={`mx-auto ${count === 1 ? 'max-w-2xl' : 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'}`}>
+                      {row.map((s, idx) => (
+                        <SingleSponsorCard
+                          key={s.id || idx}
+                          sponsor={s}
+                          size="featured"
+                          isRegistrationArea={true}
+                        />
+                      ))}
+                    </div>
+                  </ScrollReveal>
+                );
+              }
 
               // Check if row has Registration Area Sponsor AND Badge & Lanyard Sponsor (Registration on Left, Badge & Lanyard on Right)
               const regAreaSponsors = row.filter((s) => /registration/i.test(s.type));
@@ -580,6 +636,25 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
           ) : (
             /* LEGACY FALLBACK FORMAT */
             <>
+              {sponsors?.strategic && sponsors.strategic.length > 0 && (
+                <ScrollReveal className="text-center">
+                  <div className="inline-flex items-center gap-2 mb-4 px-5 py-2 bg-gradient-to-r from-[#D9A441]/20 via-[#D9A441]/30 to-[#D9A441]/20 border border-[#D9A441] rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#0A1E3F] shadow-sm">
+                    <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
+                    Strategic Partner
+                  </div>
+                  <div className="max-w-2xl mx-auto">
+                    {sponsors.strategic.map((s, idx) => (
+                      <SingleSponsorCard
+                        key={idx}
+                        sponsor={{ name: s.name, type: s.role || 'Strategic Partner', logo: s.logo, website_url: s.website_url }}
+                        size="featured"
+                        isRegistrationArea={true}
+                      />
+                    ))}
+                  </div>
+                </ScrollReveal>
+              )}
+
               {sponsors?.premier && sponsors.premier.length > 0 && (
                 <ScrollReveal className="text-center">
                   <div className="inline-flex items-center gap-2 mb-4 px-4 py-1 bg-[#D9A441]/20 border border-[#D9A441]/50 rounded-full text-xs font-bold uppercase tracking-wider text-[#0A1E3F]">

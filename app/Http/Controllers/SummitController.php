@@ -142,6 +142,9 @@ class SummitController extends Controller
         } else {
             // Fallback default sponsors
             $sponsors = [
+                'strategic' => [
+                    ['name' => 'Directorate General of Maritime Administration', 'role' => 'Strategic Partner', 'tag' => 'DGMA', 'logo' => '/new/images/sponsors/directorate-general-of-maritime-administration.jpg', 'website_url' => 'https://dgshipping.gov.in/'],
+                ],
                 'premier' => [
                     ['name' => 'AS Gold Sponsor', 'role' => 'Premier Sponsor', 'tag' => 'AS', 'logo' => '/new/images/sponsors/sponsor_1788931598_whatsapp-image-2026-09-09-at-102744.jpeg', 'website_url' => 'https://india.globalpsa.com/'],
                 ],
