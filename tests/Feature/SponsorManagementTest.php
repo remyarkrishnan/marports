@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Sponsor;
 use App\Models\User;
+use Database\Seeders\StrategicPartnerSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -121,5 +122,26 @@ class SponsorManagementTest extends TestCase
             ->component('Home')
             ->has('sponsors')
         );
+    }
+
+    public function test_strategic_partner_seeder_creates_or_updates_partner_at_sort_order_one(): void
+    {
+        // Simulate existing sponsor at order 1 (like on live before seeder runs)
+        Sponsor::create([
+            'name' => 'AS Gold Sponsor',
+            'type' => 'Premier Sponsor',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->seed(StrategicPartnerSeeder::class);
+
+        $strategic = Sponsor::where('name', 'Directorate General of Maritime Administration')->first();
+        $this->assertNotNull($strategic);
+        $this->assertEquals(1, $strategic->sort_order);
+        $this->assertEquals('Strategic Partner', $strategic->type);
+
+        $asGold = Sponsor::where('name', 'AS Gold Sponsor')->first();
+        $this->assertEquals(2, $asGold->sort_order);
     }
 }
