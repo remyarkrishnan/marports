@@ -100,7 +100,9 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
           {members.map((member, idx) => {
             const memberId = member.id || (idx + 1);
             const imageUrl = member.image ? resolveAsset(member.image) : null;
-            const bioUrl = resolveAsset(`/panel-chair-bio/${memberId}?print=1`);
+            const bioUrl = member.bio_file
+              ? resolveAsset(member.bio_file)
+              : resolveAsset(`/panel-chair-bio/${memberId}?print=1`);
 
             return (
               <ScrollReveal
@@ -167,11 +169,16 @@ export default function AdvisoryBoardGrid({ advisoryBoard = [] }) {
                     href={bioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    {...(member.bio_file ? { download: `${member.name ? member.name.replace(/\s+/g, '_') : 'Advisory_Board'}_Bio.pdf` } : {})}
                     onClick={(e) => {
+                      if (member.bio_file) {
+                        return;
+                      }
                       e.preventDefault();
                       window.open(bioUrl, '_blank');
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0A1E3F] hover:bg-[#0E4B75] text-[#F0D9A0] hover:text-white text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow transition-all duration-200 group/btn"
+                    title={`Download ${member.name} Bio`}
                   >
                     <Download className="w-4 h-4 text-[#D9A441] group-hover/btn:translate-y-0.5 transition-transform" />
                     <span>Download Bio</span>

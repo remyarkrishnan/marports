@@ -16,6 +16,8 @@ import {
   Clock,
   User as UserIcon,
   Handshake,
+  Users,
+  Award,
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title, subtitle, headerActions }) {
@@ -45,6 +47,18 @@ export default function AdminLayout({ children, title, subtitle, headerActions }
       href: adminUrls.pages || '/cms/pages',
       icon: Layers,
       active: url.includes('/cms/pages'),
+    },
+    {
+      label: 'Panel Members',
+      href: adminUrls.speakers || '/cms/panel-members',
+      icon: Users,
+      active: url.includes('/cms/panel-members') || url.includes('/cms/speakers'),
+    },
+    {
+      label: 'Advisory Board',
+      href: adminUrls.advisory_board || '/cms/advisory-board',
+      icon: Award,
+      active: url.includes('/cms/advisory-board'),
     },
     {
       label: 'Sponsors & Partners',

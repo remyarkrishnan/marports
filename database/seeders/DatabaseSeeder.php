@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             EventSettingsSeeder::class,
             RegistrationsSeeder::class,
             SponsorsSeeder::class,
+            SpeakersSeeder::class,
+            AdvisoryBoardSeeder::class,
         ]);
     }
 }

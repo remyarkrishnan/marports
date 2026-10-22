@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAdvisoryBoardController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminRegistrationController;
 use App\Http\Controllers\Admin\AdminSettingController;
+use App\Http\Controllers\Admin\AdminSpeakerController;
 use App\Http\Controllers\Admin\AdminSponsorController;
 use App\Http\Controllers\SummitController;
 use Illuminate\Support\Facades\Artisan;
@@ -56,6 +58,21 @@ Route::middleware('auth')->prefix('cms')->name('admin.')->group(function () {
     Route::post('/sponsors/{sponsor}/toggle-active', [AdminSponsorController::class, 'toggleActive'])->name('sponsors.toggle_active');
     Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('sponsors.destroy');
 
+    // Industry Thought Leaders / Panel Members & Speakers
+    Route::get('/panel-members', [AdminSpeakerController::class, 'index'])->name('speakers');
+    Route::get('/speakers', fn () => redirect()->route('admin.speakers'));
+    Route::post('/panel-members', [AdminSpeakerController::class, 'store'])->name('speakers.store');
+    Route::post('/panel-members/{speaker}', [AdminSpeakerController::class, 'update'])->name('speakers.update');
+    Route::post('/panel-members/{speaker}/toggle-active', [AdminSpeakerController::class, 'toggleActive'])->name('speakers.toggle_active');
+    Route::delete('/panel-members/{speaker}', [AdminSpeakerController::class, 'destroy'])->name('speakers.destroy');
+
+    // Advisory Board 2027 Members
+    Route::get('/advisory-board', [AdminAdvisoryBoardController::class, 'index'])->name('advisory_board');
+    Route::post('/advisory-board', [AdminAdvisoryBoardController::class, 'store'])->name('advisory_board.store');
+    Route::post('/advisory-board/{member}', [AdminAdvisoryBoardController::class, 'update'])->name('advisory_board.update');
+    Route::post('/advisory-board/{member}/toggle-active', [AdminAdvisoryBoardController::class, 'toggleActive'])->name('advisory_board.toggle_active');
+    Route::delete('/advisory-board/{member}', [AdminAdvisoryBoardController::class, 'destroy'])->name('advisory_board.destroy');
+
     // System Settings & Profile
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings');
     Route::put('/settings/profile', [AdminSettingController::class, 'updateProfile'])->name('settings.profile');
@@ -65,8 +82,10 @@ Route::middleware('auth')->prefix('cms')->name('admin.')->group(function () {
     Route::put('/settings/event', [AdminSettingController::class, 'updateEventSettings'])->name('settings.event');
 });
 
-// Single route alias for /new/cms/sponsors/{sponsor} POST update
+// Route aliases for /new/ sub-directory compatibility
 Route::post('/new/cms/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->middleware('auth');
+Route::post('/new/cms/panel-members/{speaker}', [AdminSpeakerController::class, 'update'])->middleware('auth');
+Route::post('/new/cms/advisory-board/{member}', [AdminAdvisoryBoardController::class, 'update'])->middleware('auth');
 
 Route::get('/run-optimize-clear', function () {
     try {
@@ -93,6 +112,7 @@ Route::get('/run-seeders', function () {
         $seeders = [
             'SponsorsSeeder',
             'BadgeAndLanyardSponsorSeeder',
+            'SpeakersSeeder',
         ];
 
         $output = '';
