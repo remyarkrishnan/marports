@@ -18,7 +18,6 @@ import {
   Award,
   ChevronRight,
   ExternalLink,
-  Clock
 } from 'lucide-react';
 
 import Navbar from '../Components/Navbar';
@@ -60,13 +59,6 @@ export default function Home({
   const [liveMenuLabels, setLiveMenuLabels] = useState(menuLabels || {});
   const heroVideoRef = useRef(null);
 
-  const fallbackSpeakingTopics = [
-    'Future-proofing maritime education: adapting to emerging technologies',
-    'Upskilling the maritime workforce: bridging academia and industry',
-    'Funding and risk management in ports, shipping, and shipbuilding',
-    'Strategic alliances in the maritime sector for competitive advantage',
-  ];
-  const speakingTopicsList = speakingTopics && speakingTopics.length > 0 ? speakingTopics : fallbackSpeakingTopics;
 
   const fallbackPanelDiscussions = [
     {
@@ -855,7 +847,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* 9. Key Panel Discussions & Speaking Topics (#panels) */}
+      {/* 9. Key Panel Discussions (#panels) */}
       <section id="panels" className="py-24 bg-white relative overflow-hidden">
         <div id="agenda" className="scroll-mt-24" />
         <div id="panel-topics" className="scroll-mt-24" />
@@ -875,7 +867,7 @@ export default function Home({
           </ScrollReveal>
 
           {/* 5 Key Panel Discussions from official agenda */}
-          <div className="max-w-5xl mx-auto mb-20">
+          <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {panelsList.map((panel, idx) => (
                 <ScrollReveal
@@ -909,46 +901,6 @@ export default function Home({
                 </ScrollReveal>
               ))}
             </div>
-          </div>
-
-          {/* SPEAKING TOPICS block matching marportsglobal.com/conference-topics/agenda */}
-          <div className="max-w-5xl mx-auto">
-            <ScrollReveal className="mb-6">
-              <h2 className="font-serif-heading text-2xl sm:text-3xl font-extrabold text-[#0A1E3F] tracking-wide uppercase pb-4 border-b-2 border-gray-200">
-                SPEAKING TOPICS
-              </h2>
-            </ScrollReveal>
-
-            <ScrollReveal className="bg-white rounded-2xl shadow-lg border border-[#0E4B75]/15 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 sm:p-8">
-                <div className="space-y-4">
-                  {speakingTopicsList.slice(0, 2).map((topic, i) => (
-                    <div key={i} className="flex items-start">
-                      <span className="inline-block w-2.5 h-2.5 bg-[#0E4B75] rounded-full mt-2 mr-3 shrink-0" />
-                      <span className="text-sm sm:text-base font-medium text-gray-700 leading-relaxed">
-                        {topic}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  {speakingTopicsList.slice(2).map((topic, i) => (
-                    <div key={i} className="flex items-start">
-                      <span className="inline-block w-2.5 h-2.5 bg-[#0E4B75] rounded-full mt-2 mr-3 shrink-0" />
-                      <span className="text-sm sm:text-base font-medium text-gray-700 leading-relaxed">
-                        {topic}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-[#0E4B75] via-[#0A1E3F] to-[#0E4B75] py-4 px-6 sm:px-8">
-                <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-[#D9A441]" />
-                  <span>Final Conference Agenda Will Be Updated Soon</span>
-                </h3>
-              </div>
-            </ScrollReveal>
           </div>
         </div>
       </section>
