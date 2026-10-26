@@ -7,6 +7,7 @@ use App\Models\CmsPage;
 use App\Models\Registration;
 use App\Models\Speaker;
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -138,19 +139,19 @@ class SummitController extends Controller
         if ($dbSponsors->isNotEmpty()) {
             // Group active sponsors so partners of the same category are always rendered in the same row
             $categoryOrders = [];
+            try {
+                $categories = SponsorCategory::pluck('sort_order', 'name')->toArray();
+                foreach ($categories as $catName => $order) {
+                    $categoryOrders[strtolower(trim($catName))] = (int) $order;
+                }
+            } catch (\Throwable $e) {
+                // In case table does not exist
+            }
+
             foreach ($dbSponsors as $sponsor) {
                 $typeKey = strtolower(trim($sponsor->type ?? ''));
                 if (! isset($categoryOrders[$typeKey])) {
-                    $categoryOrders[$typeKey] = match (true) {
-                        (bool) preg_match('/strategic/i', $sponsor->type) => 1,
-                        (bool) preg_match('/gold|premier/i', $sponsor->type) => 2,
-                        (bool) preg_match('/registration|badge|lanyard/i', $sponsor->type) => 3,
-                        (bool) preg_match('/lunch|coffee|conference/i', $sponsor->type) => 4,
-                        (bool) preg_match('/table\s*top/i', $sponsor->type) => 5,
-                        (bool) preg_match('/associate/i', $sponsor->type) => 6,
-                        (bool) preg_match('/promoting|supporting/i', $sponsor->type) => 7,
-                        default => (int) ($sponsor->sort_order ?? 99),
-                    };
+                    $categoryOrders[$typeKey] = (int) ($sponsor->sort_order ?? 99);
                 }
             }
 

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,7 +15,7 @@ use Inertia\Response;
 class AdminSponsorController extends Controller
 {
     /**
-     * Display a listing of all sponsors and partners.
+     * Display a listing of all sponsors, partners, and categories.
      */
     public function index(): Response
     {
@@ -21,20 +23,33 @@ class AdminSponsorController extends Controller
             ->orderBy('id', 'asc')
             ->get();
 
+        $categories = SponsorCategory::orderBy('sort_order', 'asc')
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function ($cat) use ($sponsors) {
+                $cat->sponsors_count = $sponsors->where('type', $cat->name)->count();
+
+                return $cat;
+            });
+
         $metrics = [
             'total' => $sponsors->count(),
             'active' => $sponsors->where('is_active', true)->count(),
             'inactive' => $sponsors->where('is_active', false)->count(),
             'tiers' => $sponsors->pluck('sort_order')->unique()->count(),
+            'categories' => $categories->count(),
         ];
 
         // Unique sponsor types for quick suggestions in UI
-        $existingTypes = Sponsor::distinct()->pluck('type')->filter()->values();
+        $existingTypes = $categories->pluck('name')->merge(
+            Sponsor::distinct()->pluck('type')->filter()
+        )->unique()->values();
 
         return Inertia::render('Admin/Sponsors', [
             'sponsors' => $sponsors,
             'metrics' => $metrics,
             'existingTypes' => $existingTypes,
+            'categories' => $categories,
         ]);
     }
 
@@ -45,7 +60,17 @@ class AdminSponsorController extends Controller
     {
         $normalizedType = strtolower(trim($type));
 
-        // 1. If other sponsors with this category already exist in the database, match their sort order
+        // 1. Check in SponsorCategory table first
+        try {
+            $categoryOrder = SponsorCategory::whereRaw('LOWER(name) = ?', [$normalizedType])->value('sort_order');
+            if ($categoryOrder !== null) {
+                return (int) $categoryOrder;
+            }
+        } catch (\Throwable $e) {
+            // Table might not exist yet
+        }
+
+        // 2. If other sponsors with this category already exist in the database, match their sort order
         $existingOrder = Sponsor::whereRaw('LOWER(type) = ?', [$normalizedType])
             ->whereNotNull('sort_order')
             ->value('sort_order');
@@ -54,7 +79,7 @@ class AdminSponsorController extends Controller
             return (int) $existingOrder;
         }
 
-        // 2. Standard tier patterns
+        // 3. Standard tier patterns
         if (preg_match('/strategic/i', $type)) {
             return 1;
         }
@@ -77,13 +102,13 @@ class AdminSponsorController extends Controller
             return 7;
         }
 
-        // 3. If explicit sort order was provided, use it
+        // 4. If explicit sort order was provided, use it
         if ($explicitSortOrder !== null && $explicitSortOrder > 0) {
             return $explicitSortOrder;
         }
 
-        // 4. Default to next row
-        return (int) ((Sponsor::max('sort_order') ?? 0) + 1);
+        // 5. Default to next row
+        return (int) ((SponsorCategory::max('sort_order') ?? Sponsor::max('sort_order') ?? 0) + 1);
     }
 
     /**
@@ -134,6 +159,11 @@ class AdminSponsorController extends Controller
             'is_active' => $request->boolean('is_active', true),
             'logo' => $logoPath,
         ]);
+
+        SponsorCategory::firstOrCreate(
+            ['name' => $validated['type']],
+            ['sort_order' => $sortOrder]
+        );
 
         return back()->with('success', "Sponsor '{$validated['name']}' added successfully to {$validated['type']} (Row #{$sortOrder}).");
     }
@@ -224,5 +254,115 @@ class AdminSponsorController extends Controller
         $sponsor->delete();
 
         return back()->with('success', "Sponsor '{$name}' deleted successfully.");
+    }
+
+    /**
+     * Store a new sponsor category with flexible row placement.
+     */
+    public function storeCategory(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:sponsor_categories,name'],
+            'placement_mode' => ['required', 'in:new_row,existing_row,end_row'],
+            'target_row' => ['nullable', 'integer', 'min:1'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $name = trim($validated['name']);
+        $mode = $validated['placement_mode'];
+        $targetRow = (int) ($validated['target_row'] ?? 1);
+
+        DB::transaction(function () use ($name, $mode, &$targetRow, $validated) {
+            if ($mode === 'new_row') {
+                // Shift all categories and sponsors at or after target_row down by 1
+                SponsorCategory::where('sort_order', '>=', $targetRow)->increment('sort_order');
+                Sponsor::where('sort_order', '>=', $targetRow)->increment('sort_order');
+            } elseif ($mode === 'end_row') {
+                $maxCat = (int) SponsorCategory::max('sort_order');
+                $maxSpon = (int) Sponsor::max('sort_order');
+                $targetRow = max($maxCat, $maxSpon, 0) + 1;
+            }
+            // For 'existing_row', $targetRow is used as-is (shared row, no shifting)
+
+            SponsorCategory::create([
+                'name' => $name,
+                'sort_order' => $targetRow,
+                'description' => $validated['description'] ?? null,
+            ]);
+        });
+
+        $message = match ($mode) {
+            'new_row' => "Category '{$name}' created at Row #{$targetRow}. Existing rows were pushed down.",
+            'existing_row' => "Category '{$name}' created in existing Row #{$targetRow} alongside other categories.",
+            'end_row' => "Category '{$name}' created at new final Row #{$targetRow}.",
+        };
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Update an existing sponsor category (rename or change row placement).
+     */
+    public function updateCategory(Request $request, SponsorCategory $category): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:sponsor_categories,name,'.$category->id],
+            'placement_mode' => ['required', 'in:current_row,new_row,existing_row,end_row'],
+            'target_row' => ['nullable', 'integer', 'min:1'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $oldName = $category->name;
+        $newName = trim($validated['name']);
+        $mode = $validated['placement_mode'];
+        $targetRow = (int) ($validated['target_row'] ?? $category->sort_order);
+
+        DB::transaction(function () use ($category, $oldName, $newName, $mode, &$targetRow, $validated) {
+            if ($mode === 'new_row' && $targetRow !== $category->sort_order) {
+                // Shift down rows at or above target_row
+                SponsorCategory::where('id', '!=', $category->id)
+                    ->where('sort_order', '>=', $targetRow)
+                    ->increment('sort_order');
+                Sponsor::where('type', '!=', $oldName)
+                    ->where('sort_order', '>=', $targetRow)
+                    ->increment('sort_order');
+            } elseif ($mode === 'end_row') {
+                $maxCat = (int) SponsorCategory::max('sort_order');
+                $maxSpon = (int) Sponsor::max('sort_order');
+                $targetRow = max($maxCat, $maxSpon, 0) + 1;
+            } elseif ($mode === 'current_row') {
+                $targetRow = $category->sort_order;
+            }
+
+            $category->update([
+                'name' => $newName,
+                'sort_order' => $targetRow,
+                'description' => $validated['description'] ?? null,
+            ]);
+
+            // Sync all existing sponsors that use this category
+            Sponsor::where('type', $oldName)->update([
+                'type' => $newName,
+                'sort_order' => $targetRow,
+            ]);
+        });
+
+        return back()->with('success', "Category '{$newName}' updated successfully.");
+    }
+
+    /**
+     * Delete a sponsor category.
+     */
+    public function destroyCategory(SponsorCategory $category): RedirectResponse
+    {
+        $sponsorCount = Sponsor::where('type', $category->name)->count();
+        if ($sponsorCount > 0) {
+            return back()->with('error', "Cannot delete category '{$category->name}' because it currently contains {$sponsorCount} sponsor(s). Please reassign or delete these sponsors first.");
+        }
+
+        $name = $category->name;
+        $category->delete();
+
+        return back()->with('success', "Category '{$name}' deleted successfully.");
     }
 }

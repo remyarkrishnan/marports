@@ -54,6 +54,9 @@ Route::middleware('auth')->prefix('cms')->name('admin.')->group(function () {
     // Sponsors & Partners
     Route::get('/sponsors', [AdminSponsorController::class, 'index'])->name('sponsors');
     Route::post('/sponsors', [AdminSponsorController::class, 'store'])->name('sponsors.store');
+    Route::post('/sponsors/categories', [AdminSponsorController::class, 'storeCategory'])->name('sponsors.categories.store');
+    Route::put('/sponsors/categories/{category}', [AdminSponsorController::class, 'updateCategory'])->name('sponsors.categories.update');
+    Route::delete('/sponsors/categories/{category}', [AdminSponsorController::class, 'destroyCategory'])->name('sponsors.categories.destroy');
     Route::post('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('sponsors.update');
     Route::post('/sponsors/{sponsor}/toggle-active', [AdminSponsorController::class, 'toggleActive'])->name('sponsors.toggle_active');
     Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('sponsors.destroy');
@@ -84,6 +87,9 @@ Route::middleware('auth')->prefix('cms')->name('admin.')->group(function () {
 
 // Route aliases for /new/ sub-directory compatibility
 Route::post('/new/cms/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->middleware('auth');
+Route::post('/new/cms/sponsors/categories', [AdminSponsorController::class, 'storeCategory'])->middleware('auth');
+Route::put('/new/cms/sponsors/categories/{category}', [AdminSponsorController::class, 'updateCategory'])->middleware('auth');
+Route::delete('/new/cms/sponsors/categories/{category}', [AdminSponsorController::class, 'destroyCategory'])->middleware('auth');
 Route::post('/new/cms/panel-members/{speaker}', [AdminSpeakerController::class, 'update'])->middleware('auth');
 Route::post('/new/cms/advisory-board/{member}', [AdminAdvisoryBoardController::class, 'update'])->middleware('auth');
 

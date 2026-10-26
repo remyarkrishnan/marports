@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\Admin\AdminSponsorController;
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\User;
 use Database\Seeders\ConferenceSessionSponsorSeeder;
 use Database\Seeders\StrategicPartnerSeeder;
@@ -162,5 +163,93 @@ class SponsorManagementTest extends TestCase
     {
         $order = AdminSponsorController::resolveSortOrderForType('Conference Session Sponsor');
         $this->assertEquals(4, $order);
+    }
+
+    public function test_admin_can_create_category_with_new_row_and_pushes_down_subsequent_rows(): void
+    {
+        $user = User::first() ?? User::factory()->create();
+
+        SponsorCategory::firstOrCreate(['name' => 'Strategic Partner'], ['sort_order' => 1]);
+        SponsorCategory::firstOrCreate(['name' => 'Gold Sponsor'], ['sort_order' => 2]);
+        Sponsor::create(['name' => 'Gold Co', 'type' => 'Gold Sponsor', 'sort_order' => 2, 'is_active' => true]);
+
+        $response = $this->actingAs($user)->post(route('admin.sponsors.categories.store'), [
+            'name' => 'Platinum Sponsor',
+            'placement_mode' => 'new_row',
+            'target_row' => 2,
+            'description' => 'Top tier between Strategic and Gold',
+        ]);
+
+        $response->assertRedirect();
+
+        // Platinum should be in row 2
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Platinum Sponsor',
+            'sort_order' => 2,
+        ]);
+
+        // Gold Sponsor category and its sponsors should be pushed down to row 3
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Gold Sponsor',
+            'sort_order' => 3,
+        ]);
+        $this->assertDatabaseHas('sponsors', [
+            'name' => 'Gold Co',
+            'sort_order' => 3,
+        ]);
+
+        // Strategic Partner should remain at row 1
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Strategic Partner',
+            'sort_order' => 1,
+        ]);
+    }
+
+    public function test_admin_can_create_category_sharing_existing_row_without_pushing_rows(): void
+    {
+        $user = User::first() ?? User::factory()->create();
+
+        SponsorCategory::firstOrCreate(['name' => 'Lunch & Coffee Sponsor'], ['sort_order' => 4]);
+        SponsorCategory::firstOrCreate(['name' => 'Table Top Sponsor'], ['sort_order' => 5]);
+
+        $response = $this->actingAs($user)->post(route('admin.sponsors.categories.store'), [
+            'name' => 'Beverage Partner',
+            'placement_mode' => 'existing_row',
+            'target_row' => 4,
+        ]);
+
+        $response->assertRedirect();
+
+        // Both should share row 4
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Lunch & Coffee Sponsor',
+            'sort_order' => 4,
+        ]);
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Beverage Partner',
+            'sort_order' => 4,
+        ]);
+
+        // Row 5 should NOT be pushed
+        $this->assertDatabaseHas('sponsor_categories', [
+            'name' => 'Table Top Sponsor',
+            'sort_order' => 5,
+        ]);
+    }
+
+    public function test_admin_cannot_delete_category_with_sponsors(): void
+    {
+        $user = User::first() ?? User::factory()->create();
+
+        $cat = SponsorCategory::create(['name' => 'Active Category', 'sort_order' => 3]);
+        Sponsor::create(['name' => 'Sponsor In Cat', 'type' => 'Active Category', 'sort_order' => 3, 'is_active' => true]);
+
+        $response = $this->actingAs($user)->delete(route('admin.sponsors.categories.destroy', $cat));
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('sponsor_categories', [
+            'id' => $cat->id,
+            'name' => 'Active Category',
+        ]);
     }
 }

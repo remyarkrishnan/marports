@@ -32,6 +32,30 @@ export function getSponsorTier(sponsor, explicitTier) {
   return 'default';
 }
 
+/**
+ * Determine the tier and size for a sponsor row based on row order (sort_order) and category name.
+ * Row 1 = strategic, Row 2 = gold, Row 3 = registration, Row 4 = lunch, Row 5 = tabletop, Row 6 = associate, Row 7+ = compact.
+ */
+export function getTierForRow(rowOrder, type) {
+  const typeStr = type || '';
+  if (/strategic/i.test(typeStr)) return 'strategic';
+  if (/gold|premier/i.test(typeStr)) return 'gold';
+  if (/registration|badge|lanyard/i.test(typeStr)) return 'registration';
+  if (/lunch|coffee|conference/i.test(typeStr)) return 'lunch';
+  if (/table\s*top/i.test(typeStr)) return 'tabletop';
+  if (/associate/i.test(typeStr)) return 'associate';
+  if (/promoting|supporting/i.test(typeStr)) return 'compact';
+
+  const order = Number(rowOrder) || 1;
+  if (order === 1) return 'strategic';
+  if (order === 2) return 'gold';
+  if (order === 3) return 'registration';
+  if (order === 4) return 'lunch';
+  if (order === 5) return 'tabletop';
+  if (order === 6) return 'associate';
+  return 'compact';
+}
+
 function SingleSponsorCard({ sponsor, tier, size = 'default', isRegistrationArea = false }) {
   const [imgFailed, setImgFailed] = useState(false);
   const hasLogo = sponsor.logo && !imgFailed;
@@ -283,495 +307,202 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
             sponsors.map((row, rowIdx) => {
               if (!Array.isArray(row) || row.length === 0) return null;
 
-              // Tier 1: Strategic Partner (rendered with highest distinction & biggest size)
-              const isStrategicRow = row.length > 0 && row.every((s) => /strategic/i.test(s.type));
-              if (isStrategicRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Strategic Partners' : 'Strategic Partner';
+              const rowOrder = Number(row[0]?.sort_order) || (rowIdx + 1);
+              const distinctCategories = Array.from(new Set(row.map((s) => s.type).filter(Boolean)));
+              const isMultiCategoryRow = distinctCategories.length > 1;
+
+              // CASE A: MULTIPLE CATEGORIES SHARING THE SAME ROW (e.g. Lunch & Coffee + Conference Session, Registration Area + Badge & Lanyard, etc.)
+              if (isMultiCategoryRow) {
+                const categoryGroups = distinctCategories.map((cat) => ({
+                  category: cat,
+                  sponsors: row.filter((s) => s.type === cat),
+                  tier: getTierForRow(rowOrder, cat),
+                }));
+
+                const colCount = categoryGroups.length;
+
                 return (
                   <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="text-center mb-5">
-                      <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest px-5 py-2 rounded-full border shadow-sm text-[#0A1E3F] bg-gradient-to-r from-[#D9A441]/20 via-[#D9A441]/30 to-[#D9A441]/20 border-[#D9A441]">
-                        <Sparkles className="w-4 h-4 text-[#D9A441]" />
-                        {title}
-                      </span>
-                    </div>
+                    <div
+                      className={`mx-auto items-stretch ${
+                        colCount === 2
+                          ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl'
+                          : colCount === 3
+                          ? 'grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl'
+                          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl'
+                      }`}
+                    >
+                      {categoryGroups.map((group, gIdx) => {
+                        const isGoldOrReg =
+                          /gold|premier|registration|badge|lanyard/i.test(group.category) ||
+                          rowOrder <= 3;
+                        const title =
+                          group.sponsors.length > 1 &&
+                          !group.category.endsWith('s') &&
+                          !group.category.endsWith('S')
+                            ? `${group.category}s`
+                            : group.category;
 
-                    <div className={`mx-auto ${
-                      count === 1
-                        ? 'max-w-2xl'
-                        : count === 2
-                        ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
-                        : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl'
-                    }`}>
-                      {row.map((s, idx) => (
-                        <SingleSponsorCard
-                          key={s.id || idx}
-                          sponsor={s}
-                          tier="strategic"
-                        />
-                      ))}
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 2: Gold Sponsor (second biggest tier, step-down from Strategic Partner)
-              const isGoldRow = row.length > 0 && row.every((s) => /gold|premier/i.test(s.type));
-              if (isGoldRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Gold Sponsors' : 'Gold Sponsor';
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="text-center mb-5">
-                      <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
-                        <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                        {title}
-                      </span>
-                    </div>
-
-                    <div className={`mx-auto ${
-                      count === 1
-                        ? 'max-w-lg'
-                        : count === 2
-                        ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
-                        : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl'
-                    }`}>
-                      {row.map((s, idx) => (
-                        <SingleSponsorCard
-                          key={s.id || idx}
-                          sponsor={s}
-                          tier="gold"
-                        />
-                      ))}
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 3: Registration Area Sponsor AND Badge & Lanyard Sponsor
-              const regAreaSponsors = row.filter((s) => /registration/i.test(s.type));
-              const badgeLanyardSponsors = row.filter((s) => /badge|lanyard/i.test(s.type));
-              const otherInRegRow = row.filter((s) => !/registration/i.test(s.type) && !/badge|lanyard/i.test(s.type));
-              const isRegAndBadgeRow = regAreaSponsors.length > 0 && badgeLanyardSponsors.length > 0;
-
-              if (isRegAndBadgeRow) {
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
-                      {/* Left: Registration Area Sponsor */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-center mb-4">
-                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
-                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                            {regAreaSponsors.length > 1 ? 'Registration Area Sponsors' : (regAreaSponsors[0]?.type || 'Registration Area Sponsor')}
-                          </span>
-                        </div>
-                        <div className="w-full flex-1 flex flex-col justify-center">
-                          {regAreaSponsors.map((s, idx) => (
-                            <SingleSponsorCard
-                              key={s.id || idx}
-                              sponsor={s}
-                              tier="registration"
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Right: Badge and Lanyard Sponsor */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-center mb-4">
-                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50">
-                            <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                            {badgeLanyardSponsors.length > 1 ? 'Badge & Lanyard Sponsors' : (badgeLanyardSponsors[0]?.type || 'Badge & Lanyard Sponsor')}
-                          </span>
-                        </div>
-                        <div className="w-full flex-1 flex flex-col justify-center">
-                          {badgeLanyardSponsors.map((s, idx) => (
-                            <SingleSponsorCard
-                              key={s.id || idx}
-                              sponsor={s}
-                              tier="registration"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {otherInRegRow.length > 0 && (
-                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-5xl mx-auto">
-                        {otherInRegRow.map((s, idx) => (
-                          <SingleSponsorCard key={s.id || idx} sponsor={s} tier="registration" />
-                        ))}
-                      </div>
-                    )}
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 4: Lunch & Coffee Sponsors AND Conference Session Sponsor (same row)
-              const lunchCoffeeSponsors = row.filter((s) => /lunch|coffee/i.test(s.type));
-              const confSessionSponsors = row.filter((s) => /conference/i.test(s.type));
-              const tableTopSponsors = row.filter((s) => /table\s*top/i.test(s.type));
-              const otherInLunchRow = row.filter((s) => !/lunch|coffee/i.test(s.type) && !/conference/i.test(s.type) && !/table\s*top/i.test(s.type));
-              const isLunchAndConfRow = lunchCoffeeSponsors.length > 0 && confSessionSponsors.length > 0;
-              const isLunchAndTableTopRow = lunchCoffeeSponsors.length > 0 && tableTopSponsors.length > 0 && confSessionSponsors.length === 0;
-
-              if (isLunchAndConfRow) {
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto items-stretch">
-                      {/* Left: Lunch & Coffee Sponsors */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-center mb-4">
-                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                            <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                            {lunchCoffeeSponsors.length > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor'}
-                          </span>
-                        </div>
-                        <div className={`w-full flex-1 ${
-                          lunchCoffeeSponsors.length === 1
-                            ? 'w-full max-w-md mx-auto h-full flex flex-col justify-center'
-                            : 'grid grid-cols-1 sm:grid-cols-2 gap-4 w-full h-full items-stretch'
-                        }`}>
-                          {lunchCoffeeSponsors.map((s, idx) => (
-                            <SingleSponsorCard
-                              key={s.id || idx}
-                              sponsor={s}
-                              tier="lunch"
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Right: Conference Session Sponsor */}
-                      <div className="flex flex-col items-center">
-                        <div className="text-center mb-4">
-                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                            <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                            {confSessionSponsors.length > 1 ? 'Conference Session Sponsors' : (confSessionSponsors[0]?.type || 'Conference Session Sponsor')}
-                          </span>
-                        </div>
-                        <div className={`w-full flex-1 ${
-                          confSessionSponsors.length === 1
-                            ? 'w-full max-w-md mx-auto h-full flex flex-col justify-center'
-                            : 'grid grid-cols-1 sm:grid-cols-2 gap-4 w-full h-full items-stretch'
-                        }`}>
-                          {confSessionSponsors.map((s, idx) => (
-                            <SingleSponsorCard
-                              key={s.id || idx}
-                              sponsor={s}
-                              tier="lunch"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {otherInLunchRow.length > 0 && (
-                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-6xl mx-auto">
-                        {otherInLunchRow.map((s, idx) => (
-                          <SingleSponsorCard key={s.id || idx} sponsor={s} tier="lunch" />
-                        ))}
-                      </div>
-                    )}
-                  </ScrollReveal>
-                );
-              }
-
-              if (isLunchAndTableTopRow) {
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-10">
-                    {/* Lunch & Coffee Sponsors */}
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-4">
-                        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                          <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                          {lunchCoffeeSponsors.length > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor'}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
-                        {lunchCoffeeSponsors.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[300px] sm:max-w-[360px] md:max-w-[390px]">
-                            <SingleSponsorCard sponsor={s} tier="lunch" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Table Top Sponsor */}
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-4">
-                        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                          <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                          {tableTopSponsors.length > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor'}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center justify-center gap-6">
-                        {tableTopSponsors.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[260px] sm:max-w-[310px] md:max-w-[330px]">
-                            <SingleSponsorCard sponsor={s} tier="tabletop" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {otherInLunchRow.length > 0 && (
-                      <div className="flex flex-wrap items-center justify-center gap-6 pt-4 max-w-5xl mx-auto">
-                        {otherInLunchRow.map((s, idx) => (
-                          <SingleSponsorCard key={s.id || idx} sponsor={s} />
-                        ))}
-                      </div>
-                    )}
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 4: Pure Lunch & Coffee Sponsors row
-              const isPureLunchRow = row.length > 0 && row.every((s) => /lunch|coffee/i.test(s.type));
-              if (isPureLunchRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Lunch & Coffee Sponsors' : 'Lunch & Coffee Sponsor';
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-4">
-                        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                          <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                          {title}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
-                        {row.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[300px] sm:max-w-[360px] md:max-w-[390px]">
-                            <SingleSponsorCard sponsor={s} tier="lunch" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 4: Pure Conference Session Sponsors row
-              const isPureConfRow = row.length > 0 && row.every((s) => /conference/i.test(s.type));
-              if (isPureConfRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Conference Session Sponsors' : 'Conference Session Sponsor';
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-4">
-                        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs text-[#0A1E3F] bg-[#1D63ED]/15 border-[#1D63ED]/40">
-                          <Sparkles className="w-3.5 h-3.5 text-[#1D63ED]" />
-                          {title}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
-                        {row.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[300px] sm:max-w-[360px] md:max-w-[390px]">
-                            <SingleSponsorCard sponsor={s} tier="lunch" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 5: Pure Table Top Sponsors row (visibly smaller than Lunch & Coffee)
-              const isPureTableTopRow = row.length > 0 && row.every((s) => /table\s*top/i.test(s.type));
-              if (isPureTableTopRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Table Top Sponsors' : 'Table Top Sponsor';
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="max-w-5xl mx-auto">
-                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                        {title}
-                      </h3>
-                      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6">
-                        {row.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[260px] sm:max-w-[310px] md:max-w-[330px]">
-                            <SingleSponsorCard sponsor={s} tier="tabletop" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 6: Pure Associate Sponsors row (visibly smaller than Table Top)
-              const isAssociateRow = row.length > 0 && row.every((s) => /associate/i.test(s.type));
-              if (isAssociateRow) {
-                const count = row.length;
-                const title = count > 1 ? 'Associate Sponsors' : 'Associate Sponsor';
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                    <div className="max-w-5xl mx-auto">
-                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                        {title}
-                      </h3>
-                      <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-5 sm:gap-6">
-                        {row.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[220px] sm:max-w-[270px] md:max-w-[290px]">
-                            <SingleSponsorCard sponsor={s} tier="associate" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Tier 7: Pure Promoting Organisations (most compact)
-              const isPromotingRow = row.length > 0 && row.every((s) => /promoting/i.test(s.type) || /supporting/i.test(s.type));
-              if (isPromotingRow) {
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="pt-8 border-t border-gray-200 space-y-6">
-                    <div className="text-center">
-                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] tracking-wider uppercase mb-2">
-                        {row.length > 1 ? 'PROMOTING ORGANISATIONS' : 'PROMOTING ORGANISATION'}
-                      </h3>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-4 max-w-7xl mx-auto items-center">
-                      {row.map((s, idx) => (
-                        <SingleSponsorCard key={s.id || idx} sponsor={s} tier="compact" />
-                      ))}
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // Check if row has Associate Sponsors AND Promoting Organisation mixed
-              const associateSponsors = row.filter((s) => /associate/i.test(s.type));
-              const promotingSponsors = row.filter((s) => /promoting/i.test(s.type) || /supporting/i.test(s.type));
-              const isAssociateAndPromotingRow = associateSponsors.length > 0 && promotingSponsors.length > 0;
-
-              if (isAssociateAndPromotingRow) {
-                return (
-                  <ScrollReveal key={`row-${rowIdx}`} className="space-y-8">
-                    {/* Associate Sponsors */}
-                    <div className="max-w-5xl mx-auto">
-                      <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] text-center mb-4">
-                        {associateSponsors.length > 1 ? 'Associate Sponsors' : 'Associate Sponsor'}
-                      </h3>
-                      <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-5 sm:gap-6">
-                        {associateSponsors.map((s, idx) => (
-                          <div key={s.id || idx} className="w-full max-w-[220px] sm:max-w-[270px] md:max-w-[290px]">
-                            <SingleSponsorCard sponsor={s} tier="associate" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* PROMOTING ORGANISATIONS */}
-                    <div className="pt-8 border-t border-gray-200 space-y-6">
-                      <div className="text-center">
-                        <h3 className="font-serif-heading text-lg sm:text-xl font-bold text-[#0A1E3F] tracking-wider uppercase mb-2">
-                          {promotingSponsors.length > 1 ? 'PROMOTING ORGANISATIONS' : 'PROMOTING ORGANISATION'}
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-4 max-w-7xl mx-auto items-center">
-                        {promotingSponsors.map((s, idx) => (
-                          <SingleSponsorCard key={s.id || idx} sponsor={s} tier="compact" />
-                        ))}
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              }
-
-              // General row fallback for custom types/counts
-              const commonType = row.every((s) => s.type && s.type === row[0].type)
-                ? row[0].type
-                : null;
-
-              const count = row.length;
-              const displayBadge = commonType
-                ? (count > 1 && !commonType.endsWith('s') && !commonType.endsWith('S')
-                    ? `${commonType}s`
-                    : commonType)
-                : null;
-
-              return (
-                <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
-                  {displayBadge && (
-                    <div className="text-center mb-5">
-                      <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
-                        commonType && (/registration/i.test(commonType) || /gold|premier/i.test(commonType) || /badge|lanyard/i.test(commonType))
-                          ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
-                          : 'text-[#0E4B75] bg-[#0E4B75]/10 border-[#0E4B75]/20'
-                      }`}>
-                        {count === 1 || (commonType && (/registration/i.test(commonType) || /gold|premier/i.test(commonType) || /badge|lanyard/i.test(commonType))) ? (
-                          <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                        ) : (
-                          <Award className="w-3.5 h-3.5 text-[#0E4B75]" />
-                        )}
-                        {displayBadge}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Row layout depending on number of sponsors */}
-                  {count === 1 && (
-                    <div className="max-w-xl mx-auto">
-                      <SingleSponsorCard
-                        sponsor={row[0]}
-                      />
-                    </div>
-                  )}
-
-                  {count === 2 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
-                      {row.map((s, idx) => {
-                        const isFeaturedTier = s.type && (/registration/i.test(s.type) || /gold|premier/i.test(s.type) || /badge|lanyard/i.test(s.type));
                         return (
-                          <div key={s.id || idx} className="flex flex-col items-center">
-                            {!commonType && s.type && (
-                              <div className="text-center mb-4">
-                                <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
-                                  isFeaturedTier
+                          <div key={gIdx} className="flex flex-col items-center">
+                            <div className="text-center mb-4">
+                              <span
+                                className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
+                                  isGoldOrReg
                                     ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
-                                    : 'text-[#0E4B75] bg-[#0E4B75]/10 border-[#0E4B75]/20'
-                                }`}>
-                                  {isFeaturedTier ? (
-                                    <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                                  ) : (
-                                    <Award className="w-3.5 h-3.5 text-[#0E4B75]" />
-                                  )}
-                                  {s.type}
-                                </span>
-                              </div>
-                            )}
-                            <div className="w-full flex-1 flex flex-col justify-center">
-                              <SingleSponsorCard sponsor={s} />
+                                    : 'text-[#0E4B75] bg-[#1D63ED]/15 border-[#1D63ED]/40'
+                                }`}
+                              >
+                                <Sparkles
+                                  className={`w-3.5 h-3.5 ${
+                                    isGoldOrReg ? 'text-[#D9A441]' : 'text-[#1D63ED]'
+                                  }`}
+                                />
+                                {title}
+                              </span>
+                            </div>
+
+                            <div
+                              className={`w-full flex-1 ${
+                                group.sponsors.length === 1
+                                  ? 'w-full max-w-md mx-auto h-full flex flex-col justify-center'
+                                  : 'grid grid-cols-1 sm:grid-cols-2 gap-4 w-full h-full items-stretch'
+                              }`}
+                            >
+                              {group.sponsors.map((s, idx) => (
+                                <SingleSponsorCard
+                                  key={s.id || idx}
+                                  sponsor={s}
+                                  tier={group.tier}
+                                />
+                              ))}
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  )}
+                  </ScrollReveal>
+                );
+              }
 
-                  {count === 3 && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              // CASE B: SINGLE CATEGORY IN THIS ROW
+              const categoryName = distinctCategories[0] || 'Sponsor';
+              const tier = getTierForRow(rowOrder, categoryName);
+              const count = row.length;
+              const isGoldOrReg =
+                /strategic|gold|premier|registration|badge|lanyard/i.test(categoryName) ||
+                rowOrder <= 3;
+
+              const title =
+                count > 1 && !categoryName.endsWith('s') && !categoryName.endsWith('S')
+                  ? `${categoryName}s`
+                  : categoryName;
+
+              return (
+                <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
+                  {/* Category Badge Header */}
+                  <div className="text-center mb-5">
+                    <span
+                      className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
+                        tier === 'strategic'
+                          ? 'text-[#0A1E3F] bg-gradient-to-r from-[#D9A441]/20 via-[#D9A441]/30 to-[#D9A441]/20 border-[#D9A441] sm:text-sm px-5 py-2'
+                          : isGoldOrReg
+                          ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
+                          : 'text-[#0E4B75] bg-[#1D63ED]/15 border-[#1D63ED]/40'
+                      }`}
+                    >
+                      <Sparkles
+                        className={`w-3.5 h-3.5 ${
+                          isGoldOrReg ? 'text-[#D9A441]' : 'text-[#1D63ED]'
+                        }`}
+                      />
+                      {title}
+                    </span>
+                  </div>
+
+                  {/* Sized Card Layout According to Tier */}
+                  {tier === 'strategic' && (
+                    <div
+                      className={`mx-auto ${
+                        count === 1
+                          ? 'max-w-2xl'
+                          : count === 2
+                          ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
+                          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl'
+                      }`}
+                    >
                       {row.map((s, idx) => (
-                        <SingleSponsorCard key={s.id || idx} sponsor={s} />
+                        <SingleSponsorCard key={s.id || idx} sponsor={s} tier="strategic" />
                       ))}
                     </div>
                   )}
 
-                  {count === 4 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                  {tier === 'gold' && (
+                    <div
+                      className={`mx-auto ${
+                        count === 1
+                          ? 'max-w-lg'
+                          : count === 2
+                          ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
+                          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl'
+                      }`}
+                    >
                       {row.map((s, idx) => (
-                        <SingleSponsorCard key={s.id || idx} sponsor={s} />
+                        <SingleSponsorCard key={s.id || idx} sponsor={s} tier="gold" />
                       ))}
                     </div>
                   )}
 
-                  {count >= 5 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 max-w-7xl mx-auto">
+                  {(tier === 'registration' || tier === 'lunch') && (
+                    <div
+                      className={`mx-auto ${
+                        count === 1
+                          ? 'max-w-md'
+                          : count === 2
+                          ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
+                          : count === 3
+                          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl'
+                          : 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl'
+                      }`}
+                    >
+                      {row.map((s, idx) => (
+                        <SingleSponsorCard key={s.id || idx} sponsor={s} tier={tier} />
+                      ))}
+                    </div>
+                  )}
+
+                  {tier === 'tabletop' && (
+                    <div className="max-w-5xl mx-auto">
+                      <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-6">
+                        {row.map((s, idx) => (
+                          <div
+                            key={s.id || idx}
+                            className="w-full max-w-[260px] sm:max-w-[310px] md:max-w-[330px]"
+                          >
+                            <SingleSponsorCard sponsor={s} tier="tabletop" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {tier === 'associate' && (
+                    <div className="max-w-5xl mx-auto">
+                      <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-100 flex flex-wrap items-center justify-center gap-5 sm:gap-6">
+                        {row.map((s, idx) => (
+                          <div
+                            key={s.id || idx}
+                            className="w-full max-w-[220px] sm:max-w-[270px] md:max-w-[290px]"
+                          >
+                            <SingleSponsorCard sponsor={s} tier="associate" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {tier === 'compact' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-4 max-w-7xl mx-auto items-center">
                       {row.map((s, idx) => (
                         <SingleSponsorCard key={s.id || idx} sponsor={s} tier="compact" />
                       ))}

@@ -24,10 +24,13 @@ import {
   Building,
   HelpCircle,
   ArrowUpDown,
+  FolderPlus,
+  Tag,
+  Settings,
 } from 'lucide-react';
 import { resolveAsset } from '../../utils/asset';
 
-export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = [] }) {
+export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = [], categories = [] }) {
   const { flash } = usePage().props;
 
   // Search & Filter state
@@ -36,12 +39,26 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('ALL');
   const [viewMode, setViewMode] = useState('grouped'); // 'grouped' or 'table'
 
-  // Modal states
+  // Sponsor Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState(null);
   const [targetRowTier, setTargetRowTier] = useState(null);
   const [deleteConfirmSponsor, setDeleteConfirmSponsor] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
+
+  // Category Modal states
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [categoryModalTab, setCategoryModalTab] = useState('create'); // 'create' or 'list'
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [deleteConfirmCategory, setDeleteConfirmCategory] = useState(null);
+
+  // Category Form
+  const categoryForm = useForm({
+    name: '',
+    placement_mode: 'new_row', // 'new_row' | 'existing_row' | 'end_row' | 'current_row'
+    target_row: 1,
+    description: '',
+  });
 
   // Common preset sponsor types
   const defaultTypes = [
@@ -66,7 +83,15 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     if (!typeName) return 1;
     const normalized = typeName.trim().toLowerCase();
 
-    // 1. If any sponsor with this exact/case-insensitive type already exists in DB, use its sort order
+    // 1. Check database categories table first
+    const catMatch = categories.find(
+      (c) => c.name && c.name.trim().toLowerCase() === normalized
+    );
+    if (catMatch && catMatch.sort_order) {
+      return Number(catMatch.sort_order);
+    }
+
+    // 2. If any sponsor with this exact/case-insensitive type already exists in DB, use its sort order
     const match = existingSponsors.find(
       (s) => s.type && s.type.trim().toLowerCase() === normalized
     );
@@ -74,7 +99,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
       return Number(match.sort_order);
     }
 
-    // 2. Standard category pattern matching
+    // 3. Standard category pattern matching
     if (/strategic/i.test(normalized)) return 1;
     if (/gold|premier/i.test(normalized)) return 2;
     if (/registration|badge|lanyard/i.test(normalized)) return 3;
@@ -83,19 +108,113 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     if (/associate/i.test(normalized)) return 6;
     if (/promoting|supporting/i.test(normalized)) return 7;
 
-    // 3. Fallback to next new row
-    if (existingSponsors.length > 0) {
-      return Math.max(...existingSponsors.map((s) => Number(s.sort_order) || 1)) + 1;
-    }
-    return 1;
+    // 4. Fallback to next new row
+    const maxOrder = Math.max(
+      0,
+      ...categories.map((c) => Number(c.sort_order) || 0),
+      ...existingSponsors.map((s) => Number(s.sort_order) || 0)
+    );
+    return maxOrder > 0 ? maxOrder + 1 : 1;
   };
 
   const allAvailableTypes = useMemo(() => {
-    const set = new Set([...defaultTypes, ...existingTypes]);
-    return Array.from(set);
-  }, [existingTypes]);
+    const set = new Set([
+      ...categories.map((c) => c.name),
+      ...existingTypes,
+      ...defaultTypes,
+    ]);
+    return Array.from(set).filter(Boolean);
+  }, [categories, existingTypes]);
 
-  // Form for Add & Edit
+  // All distinct row numbers
+  const allRowOrders = useMemo(() => {
+    const orders = new Set([
+      ...categories.map((c) => Number(c.sort_order) || 1),
+      ...sponsors.map((s) => Number(s.sort_order) || 1),
+    ]);
+    if (orders.size === 0) orders.add(1);
+    return Array.from(orders).sort((a, b) => a - b);
+  }, [categories, sponsors]);
+
+  const maxRowOrder = useMemo(() => {
+    return allRowOrders.length > 0 ? Math.max(...allRowOrders) : 1;
+  }, [allRowOrders]);
+
+  // Category Modal Handlers
+  const openCreateCategoryModal = (targetRow = null, placementMode = 'new_row') => {
+    setEditingCategory(null);
+    categoryForm.reset();
+    categoryForm.setData({
+      name: '',
+      placement_mode: targetRow !== null ? placementMode : 'new_row',
+      target_row: targetRow !== null ? Number(targetRow) : 1,
+      description: '',
+    });
+    setCategoryModalTab('create');
+    setCategoryModalOpen(true);
+  };
+
+  const openEditCategoryModal = (category) => {
+    setEditingCategory(category);
+    categoryForm.reset();
+    categoryForm.setData({
+      name: category.name || '',
+      placement_mode: 'current_row',
+      target_row: Number(category.sort_order) || 1,
+      description: category.description || '',
+    });
+    setCategoryModalTab('create');
+    setCategoryModalOpen(true);
+  };
+
+  const handleCategorySubmit = (e) => {
+    e.preventDefault();
+    if (!categoryForm.data.name.trim()) {
+      alert('Please enter a category name.');
+      return;
+    }
+
+    if (editingCategory) {
+      categoryForm.put(`/cms/sponsors/categories/${editingCategory.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+          setCategoryModalOpen(false);
+          setEditingCategory(null);
+          categoryForm.reset();
+        },
+      });
+    } else {
+      categoryForm.post('/cms/sponsors/categories', {
+        preserveScroll: true,
+        onSuccess: () => {
+          setCategoryModalOpen(false);
+          categoryForm.reset();
+        },
+      });
+    }
+  };
+
+  const handleDeleteCategory = (category) => {
+    if ((category.sponsors_count ?? 0) > 0) {
+      alert(
+        `Cannot delete category "${category.name}" because it currently contains ${category.sponsors_count} sponsor(s). Please delete or reassign them first.`
+      );
+      return;
+    }
+    setDeleteConfirmCategory(category);
+  };
+
+  const confirmDeleteCategory = () => {
+    if (!deleteConfirmCategory) return;
+    router.delete(`/cms/sponsors/categories/${deleteConfirmCategory.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setDeleteConfirmCategory(null);
+      },
+    });
+  };
+
+  // Form for Add & Edit Sponsor
   const form = useForm({
     type: 'Strategic Partner',
     custom_type: '',
@@ -117,14 +236,19 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     // Determine type
     let typeToUse = suggestedType;
     if (!typeToUse && targetSortOrder !== null) {
-      const inRow = sponsors.find((s) => Number(s.sort_order) === Number(targetSortOrder));
-      if (inRow) typeToUse = inRow.type;
+      const inCat = categories.find((c) => Number(c.sort_order) === Number(targetSortOrder));
+      if (inCat) {
+        typeToUse = inCat.name;
+      } else {
+        const inRow = sponsors.find((s) => Number(s.sort_order) === Number(targetSortOrder));
+        if (inRow) typeToUse = inRow.type;
+      }
     }
     if (!typeToUse) {
-      typeToUse = defaultTypes[0] || 'Strategic Partner';
+      typeToUse = categories[0]?.name || defaultTypes[0] || 'Strategic Partner';
     }
 
-    const isCustom = !defaultTypes.includes(typeToUse);
+    const isCustom = !defaultTypes.includes(typeToUse) && !categories.some((c) => c.name === typeToUse);
 
     // If targetSortOrder was explicitly provided, use it; otherwise auto-align with category
     const order = targetSortOrder !== null
@@ -280,14 +404,39 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
       title="Sponsors & Partners"
       subtitle="Manage summit sponsors, partner organisations, display tiers and logo placements"
       headerActions={
-        <button
-          type="button"
-          onClick={openAddModal}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#1eb855] hover:to-[#158f41] text-[#0A1E3F] font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Sponsor / Partner</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setEditingCategory(null);
+              categoryForm.reset();
+              setCategoryModalTab('list');
+              setCategoryModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-purple-300 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+          >
+            <Layers className="w-4 h-4 text-purple-400" />
+            <span>Manage Categories ({categories.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openCreateCategoryModal()}
+            className="px-3.5 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-sky-300 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+          >
+            <FolderPlus className="w-4 h-4 text-sky-400" />
+            <span>+ New Category</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openAddModal()}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#1eb855] hover:to-[#158f41] text-[#0A1E3F] font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Sponsor / Partner</span>
+          </button>
+        </div>
       }
     >
       <div className="space-y-6">
@@ -340,21 +489,34 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
             </div>
           </div>
 
-          <div className="bg-[#0A1529] border border-[#152747] rounded-2xl p-4 sm:p-5 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              setEditingCategory(null);
+              setCategoryModalTab('list');
+              setCategoryModalOpen(true);
+            }}
+            className="bg-[#0A1529] hover:bg-[#0E1E38] border border-[#152747] hover:border-purple-500/50 rounded-2xl p-4 sm:p-5 flex items-center justify-between text-left transition-all cursor-pointer group"
+          >
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
                 <Layers className="w-3 h-3" />
-                Display Rows (Tiers)
+                Categories & Rows
               </div>
-              <div className="text-3xl font-extrabold text-purple-300 mt-1">
-                {metrics.tiers ?? groupedBySortOrder.length}
+              <div className="text-3xl font-extrabold text-purple-300 mt-1 flex items-baseline gap-2">
+                <span>{categories.length || metrics.categories || 0}</span>
+                <span className="text-xs text-slate-400 font-normal">
+                  in {allRowOrders.length} {allRowOrders.length === 1 ? 'row' : 'rows'}
+                </span>
               </div>
-              <div className="text-xs text-slate-400 mt-0.5">Grouped by Sort Order</div>
+              <div className="text-xs text-purple-400/80 group-hover:text-purple-300 mt-0.5 flex items-center gap-1 font-medium">
+                <span>Manage Categories &rarr;</span>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
               <ArrowUpDown className="w-5 h-5" />
             </div>
-          </div>
+          </button>
         </div>
 
         {/* 2. Search, Filter, and View Controls */}
@@ -445,18 +607,37 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
         {/* 4. Display Sponsors: Grouped by Row (Sort Order) */}
         {viewMode === 'grouped' ? (
           <div className="space-y-6">
-            {groupedBySortOrder.length === 0 ? (
+            {allRowOrders.length === 0 ? (
               <div className="p-12 text-center bg-[#0A1529] border border-[#152747] rounded-2xl">
                 <Building className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-                <h4 className="text-base font-bold text-white">No sponsors found</h4>
+                <h4 className="text-base font-bold text-white">No sponsors or categories found</h4>
                 <p className="text-xs text-slate-400 mt-1">
-                  Try adjusting your filters or click "Add Sponsor / Partner" to create one.
+                  Click "+ New Category" or "+ Add Sponsor / Partner" to get started.
                 </p>
               </div>
             ) : (
-              groupedBySortOrder.map(([sortOrder, sponsorList]) => {
-                const uniqueCategoriesInRow = Array.from(new Set(sponsorList.map((s) => s.type).filter(Boolean)));
-                const rowCategoryTitle = uniqueCategoriesInRow.length > 0 ? uniqueCategoriesInRow.join(' & ') : `Row ${sortOrder}`;
+              allRowOrders.map((sortOrder) => {
+                const rowCategories = categories.filter((c) => Number(c.sort_order) === Number(sortOrder));
+                const rowSponsors = filteredSponsors.filter((s) => Number(s.sort_order) === Number(sortOrder));
+
+                // If user applied search/filter and neither category nor sponsors match, skip row
+                const hasFilter = searchQuery || selectedTypeFilter !== 'ALL' || selectedStatusFilter !== 'ALL';
+                const searchMatchesCat = searchQuery && rowCategories.some((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                if (hasFilter && rowSponsors.length === 0 && !searchMatchesCat) {
+                  return null;
+                }
+
+                const uniqueCategoriesInRow = Array.from(
+                  new Set([
+                    ...rowCategories.map((c) => c.name),
+                    ...rowSponsors.map((s) => s.type),
+                  ])
+                ).filter(Boolean);
+
+                const rowCategoryTitle =
+                  uniqueCategoriesInRow.length > 0
+                    ? uniqueCategoriesInRow.join(' & ')
+                    : `Row ${sortOrder}`;
 
                 return (
                 <div
@@ -466,40 +647,109 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                   {/* Row Tier Header */}
                   <div className="p-4 sm:p-5 bg-[#0A1529] border-b border-[#152747] flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-sm">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-sm shrink-0">
                         #{sortOrder}
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-white flex items-center gap-2">
-                          <span>Row {sortOrder} — {rowCategoryTitle}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-base font-bold text-white">
+                            Row #{sortOrder}
+                          </h3>
+
+                          {/* Category Badges with quick Edit & Delete */}
+                          {rowCategories.length > 0 ? (
+                            rowCategories.map((cat) => (
+                              <span
+                                key={cat.id}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#112344] border border-[#1E3A68] text-xs font-bold text-[#D9A441]"
+                              >
+                                <Tag className="w-3 h-3 text-[#D9A441]" />
+                                <span>{cat.name}</span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  ({cat.sponsors_count ?? 0})
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditCategoryModal(cat)}
+                                  className="p-0.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                                  title={`Edit "${cat.name}"`}
+                                >
+                                  <Edit2 className="w-3 h-3 text-sky-400" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCategory(cat)}
+                                  className="p-0.5 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                                  title={`Delete "${cat.name}"`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-rose-400" />
+                                </button>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">
+                              ({rowCategoryTitle})
+                            </span>
+                          )}
+
                           <span className="text-xs font-normal text-slate-400">
-                            ({sponsorList.length} {sponsorList.length === 1 ? 'partner' : 'partners'})
+                            &bull; {rowSponsors.length} {rowSponsors.length === 1 ? 'partner' : 'partners'}
                           </span>
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          Appears together in {rowCategoryTitle} on public website
+                        </div>
+
+                        <p className="text-xs text-slate-400 mt-1">
+                          {rowCategories.length > 1
+                            ? `Shared Row: ${rowCategories.map((c) => c.name).join(' and ')} appear side-by-side in this row`
+                            : `Appears on website in Row #${sortOrder} tier: ${rowCategoryTitle}`}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded-full bg-[#112344] text-slate-300 border border-[#1E3A68]">
                         Sort Order: {sortOrder}
                       </span>
+
                       <button
                         type="button"
-                        onClick={() => openAddModal(sortOrder, sponsorList[0]?.type)}
+                        onClick={() => openCreateCategoryModal(sortOrder, 'existing_row')}
+                        className="px-3 py-1.5 rounded-xl bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-purple-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        title={`Add another category to share Row #${sortOrder}`}
+                      >
+                        <FolderPlus className="w-3.5 h-3.5 text-purple-400" />
+                        <span>+ Add Category to Row #{sortOrder}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => openAddModal(sortOrder, rowCategories[0]?.name || rowSponsors[0]?.type)}
                         className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Add Sponsor to {rowCategoryTitle}</span>
+                        <span>+ Add Sponsor</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Sponsors in this row grid */}
                   <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {sponsorList.map((sponsor) => (
+                    {rowSponsors.length === 0 && (
+                      <div className="col-span-full p-6 text-center rounded-2xl bg-[#070E1B]/40 border border-[#152747] text-slate-400">
+                        <p className="text-xs">
+                          No sponsors have been assigned to <strong>Row #{sortOrder} ({rowCategoryTitle})</strong> yet.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => openAddModal(sortOrder, rowCategories[0]?.name)}
+                          className="mt-3 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add First Sponsor to Row #{sortOrder}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {rowSponsors.map((sponsor) => (
                       <div
                         key={sponsor.id}
                         className={`rounded-2xl border p-4 sm:p-5 transition-all duration-200 flex flex-col justify-between ${
@@ -635,7 +885,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                     {/* Quick Add Sponsor Card for this specific row */}
                     <button
                       type="button"
-                      onClick={() => openAddModal(sortOrder, sponsorList[0]?.type)}
+                      onClick={() => openAddModal(sortOrder, rowCategories[0]?.name || rowSponsors[0]?.type)}
                       className="rounded-2xl border-2 border-dashed border-[#1E3A68] hover:border-purple-500 bg-[#070E1B]/40 hover:bg-purple-600/10 p-5 flex flex-col items-center justify-center text-center transition-all group min-h-[190px] cursor-pointer"
                     >
                       <div className="w-10 h-10 rounded-xl bg-purple-600/15 group-hover:bg-purple-600 text-purple-300 group-hover:text-white flex items-center justify-center mb-2.5 transition-all shadow-sm">
@@ -803,9 +1053,22 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
               )}
               {/* Type Selection */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Sponsor Type / Category <span className="text-rose-400">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Sponsor Type / Category <span className="text-rose-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalOpen(false);
+                      openCreateCategoryModal(form.data.sort_order);
+                    }}
+                    className="text-[11px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <FolderPlus className="w-3 h-3" />
+                    <span>+ New Category</span>
+                  </button>
+                </div>
                 <select
                   value={form.data.type}
                   onChange={(e) => {
@@ -825,11 +1088,24 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                   className="w-full px-3 py-2 rounded-xl bg-[#081120] border border-[#152747] text-white text-xs focus:outline-none focus:border-purple-500"
                   required
                 >
-                  {allAvailableTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
+                  <optgroup label="Configured Categories">
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name} (Row #{cat.sort_order})
+                      </option>
+                    ))}
+                  </optgroup>
+                  {allAvailableTypes.filter((t) => !categories.some((c) => c.name === t)).length > 0 && (
+                    <optgroup label="Other Types">
+                      {allAvailableTypes
+                        .filter((t) => !categories.some((c) => c.name === t))
+                        .map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
                   <option value="CUSTOM">+ Custom / Enter new type...</option>
                 </select>
 
@@ -1042,7 +1318,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
         </div>
       )}
 
-      {/* 7. DELETE CONFIRMATION MODAL */}
+      {/* 7. DELETE SPONSOR CONFIRMATION MODAL */}
       {deleteConfirmSponsor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
           <div className="bg-[#0A1529] border border-[#1E3A68] rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200 space-y-4">
@@ -1070,6 +1346,466 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
               <button
                 type="button"
                 onClick={handleDelete}
+                className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors shadow-md cursor-pointer"
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. CATEGORY & ROW MANAGEMENT MODAL */}
+      {categoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-[#0A1529] border border-[#1E3A68] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-[#152747] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 flex items-center justify-center">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    {editingCategory
+                      ? `Edit Category: ${editingCategory.name}`
+                      : 'Category & Row Placement'}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Control row positions, push down tiers, or share rows side-by-side
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoryModalOpen(false);
+                  setEditingCategory(null);
+                }}
+                className="w-8 h-8 rounded-lg bg-[#112344] hover:bg-[#182F58] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div className="flex border-b border-[#152747] bg-[#070E1B]/60 px-4">
+              <button
+                type="button"
+                onClick={() => setCategoryModalTab('create')}
+                className={`py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                  categoryModalTab === 'create'
+                    ? 'border-purple-500 text-purple-300 bg-purple-500/10'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {editingCategory ? 'Edit Category Placement' : '+ Add New Category'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCategoryModalTab('list')}
+                className={`py-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                  categoryModalTab === 'list'
+                    ? 'border-purple-500 text-purple-300 bg-purple-500/10'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                All Categories ({categories.length})
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            {categoryModalTab === 'create' ? (
+              <form onSubmit={handleCategorySubmit} className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+                {/* Category Name */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Category Name <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={categoryForm.data.name}
+                    onChange={(e) => categoryForm.setData('name', e.target.value)}
+                    placeholder="e.g. Lead Maritime Partner, Badge & Lanyard Sponsor"
+                    className="w-full px-3 py-2 rounded-xl bg-[#081120] border border-[#152747] text-white text-xs focus:outline-none focus:border-purple-500"
+                    required
+                  />
+                  {categoryForm.errors.name && (
+                    <p className="mt-1 text-xs text-rose-400">{categoryForm.errors.name}</p>
+                  )}
+                </div>
+
+                {/* Placement Options: The Core Feature Requested by User */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Row Placement Rule <span className="text-rose-400">*</span>
+                  </label>
+
+                  {/* Option 1: Take over an existing row (push existing rows down) */}
+                  <label
+                    className={`block p-3.5 rounded-xl border cursor-pointer transition-all ${
+                      categoryForm.data.placement_mode === 'new_row'
+                        ? 'bg-purple-600/15 border-purple-500 text-white shadow-xs'
+                        : 'bg-[#081120] border-[#152747] text-slate-300 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="placement_mode"
+                        value="new_row"
+                        checked={categoryForm.data.placement_mode === 'new_row'}
+                        onChange={(e) => categoryForm.setData('placement_mode', e.target.value)}
+                        className="mt-0.5 w-4 h-4 text-purple-600 focus:ring-purple-500 bg-[#081120] border-[#152747]"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>Take over an existing row (Push existing rows down)</span>
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                            Push Down
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          This category takes over a row. Old category and its sponsors in that row, plus all subsequent rows, will automatically be pushed down to the next row (Row + 1).
+                        </p>
+
+                        {categoryForm.data.placement_mode === 'new_row' && (
+                          <div className="mt-3 p-3 rounded-lg bg-[#070E1B] border border-purple-500/30 space-y-2.5">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-purple-200 font-semibold">
+                                Target Row to Take Over:
+                              </span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="99"
+                                value={categoryForm.data.target_row}
+                                onChange={(e) =>
+                                  categoryForm.setData(
+                                    'target_row',
+                                    Math.max(1, parseInt(e.target.value, 10) || 1)
+                                  )
+                                }
+                                className="w-20 px-2.5 py-1 rounded-lg bg-[#0A1529] border border-purple-400 text-white text-xs font-bold text-center focus:outline-none"
+                              />
+                            </div>
+
+                            {/* Live preview of what gets pushed down */}
+                            {(() => {
+                              const target = Number(categoryForm.data.target_row) || 1;
+                              const affectedCategories = categories.filter(
+                                (c) => Number(c.sort_order) >= target && (!editingCategory || c.id !== editingCategory.id)
+                              );
+                              return (
+                                <div className="text-[11px] text-purple-300/90 leading-relaxed">
+                                  ⚡ <strong>Result:</strong> This category will become{' '}
+                                  <span className="underline font-bold">Row #{target}</span>.
+                                  {affectedCategories.length > 0 ? (
+                                    <span className="block text-slate-400 mt-1">
+                                      Rows pushed down: {affectedCategories.map((c) => `"${c.name}" (Row #${c.sort_order} &rarr; Row #${c.sort_order + 1})`).slice(0, 3).join(', ')}
+                                      {affectedCategories.length > 3 && `, and ${affectedCategories.length - 3} more...`}
+                                    </span>
+                                  ) : (
+                                    <span className="block text-slate-400 mt-1">
+                                      (No existing rows will be pushed down since Row #{target} is currently empty.)
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Option 2: Share an existing row with other category/categories */}
+                  <label
+                    className={`block p-3.5 rounded-xl border cursor-pointer transition-all ${
+                      categoryForm.data.placement_mode === 'existing_row'
+                        ? 'bg-purple-600/15 border-purple-500 text-white shadow-xs'
+                        : 'bg-[#081120] border-[#152747] text-slate-300 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="placement_mode"
+                        value="existing_row"
+                        checked={categoryForm.data.placement_mode === 'existing_row'}
+                        onChange={(e) => categoryForm.setData('placement_mode', e.target.value)}
+                        className="mt-0.5 w-4 h-4 text-purple-600 focus:ring-purple-500 bg-[#081120] border-[#152747]"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>Share an existing row with other category/categories</span>
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-300">
+                            Shared Row
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Both categories appear side-by-side in the same row (like Lunch & Coffee + Conference Session). No other rows are pushed down.
+                        </p>
+
+                        {categoryForm.data.placement_mode === 'existing_row' && (
+                          <div className="mt-3 p-3 rounded-lg bg-[#070E1B] border border-purple-500/30 space-y-2">
+                            <span className="text-xs text-purple-200 font-semibold block">
+                              Select Existing Row to Share With:
+                            </span>
+                            <select
+                              value={categoryForm.data.target_row}
+                              onChange={(e) =>
+                                categoryForm.setData('target_row', Number(e.target.value) || 1)
+                              }
+                              className="w-full px-3 py-1.5 rounded-lg bg-[#0A1529] border border-purple-400 text-white text-xs focus:outline-none"
+                            >
+                              {allRowOrders.map((rowNum) => {
+                                const rowCats = categories.filter(
+                                  (c) => Number(c.sort_order) === Number(rowNum) && (!editingCategory || c.id !== editingCategory.id)
+                                );
+                                const label = rowCats.length > 0 ? rowCats.map((c) => c.name).join(', ') : 'Empty Row';
+                                return (
+                                  <option key={rowNum} value={rowNum}>
+                                    Row #{rowNum} &mdash; ({label})
+                                  </option>
+                                );
+                              })}
+                            </select>
+
+                            <div className="text-[11px] text-sky-300 mt-1">
+                              🤝 <strong>Result:</strong> Will appear side-by-side with other sponsors in <strong>Row #{categoryForm.data.target_row}</strong>.
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Option 3: Add as a new row at the end */}
+                  <label
+                    className={`block p-3.5 rounded-xl border cursor-pointer transition-all ${
+                      categoryForm.data.placement_mode === 'end_row'
+                        ? 'bg-purple-600/15 border-purple-500 text-white shadow-xs'
+                        : 'bg-[#081120] border-[#152747] text-slate-300 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="placement_mode"
+                        value="end_row"
+                        checked={categoryForm.data.placement_mode === 'end_row'}
+                        onChange={(e) => categoryForm.setData('placement_mode', e.target.value)}
+                        className="mt-0.5 w-4 h-4 text-purple-600 focus:ring-purple-500 bg-[#081120] border-[#152747]"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>Add as a new row at the very end</span>
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                            Row #{maxRowOrder + 1}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Placed after all current categories without disturbing existing rows.
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Option 4: (Edit Mode only) Keep in current row */}
+                  {editingCategory && (
+                    <label
+                      className={`block p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        categoryForm.data.placement_mode === 'current_row'
+                          ? 'bg-purple-600/15 border-purple-500 text-white shadow-xs'
+                          : 'bg-[#081120] border-[#152747] text-slate-300 hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="radio"
+                          name="placement_mode"
+                          value="current_row"
+                          checked={categoryForm.data.placement_mode === 'current_row'}
+                          onChange={(e) => categoryForm.setData('placement_mode', e.target.value)}
+                          className="mt-0.5 w-4 h-4 text-purple-600 focus:ring-purple-500 bg-[#081120] border-[#152747]"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold text-white flex items-center justify-between">
+                            <span>Keep in current row (Row #{editingCategory.sort_order})</span>
+                            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-500/20 text-slate-300">
+                              Current Row
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Keep category in its current position and only update its name or description.
+                          </p>
+                        </div>
+                      </div>
+                    </label>
+                  )}
+                </div>
+
+                {/* Description / Subtitle */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Description / Note (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={categoryForm.data.description}
+                    onChange={(e) => categoryForm.setData('description', e.target.value)}
+                    placeholder="Short description or internal note for this category tier..."
+                    className="w-full px-3 py-2 rounded-xl bg-[#081120] border border-[#152747] text-white text-xs focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                {/* Form Actions */}
+                <div className="pt-3 border-t border-[#152747] flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategoryModalOpen(false);
+                      setEditingCategory(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={categoryForm.processing}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>
+                      {categoryForm.processing
+                        ? 'Saving...'
+                        : editingCategory
+                        ? 'Update Category'
+                        : 'Create Category'}
+                    </span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* TAB 2: ALL CATEGORIES LIST */
+              <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-400">
+                    Categories are ordered by their row position on the public website.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openCreateCategoryModal()}
+                    className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ New Category</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {categories.map((cat) => (
+                    <div
+                      key={cat.id}
+                      className="p-3 rounded-xl bg-[#081120] border border-[#152747] hover:border-purple-500/40 flex items-center justify-between gap-3 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-purple-600/20 text-purple-300 border border-purple-500/30 font-bold text-xs flex items-center justify-center shrink-0">
+                          #{cat.sort_order}
+                        </span>
+                        <div>
+                          <div className="text-xs font-bold text-white flex items-center gap-2">
+                            <span>{cat.name}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#112344] text-[#D9A441] border border-[#1E3A68]">
+                              {cat.sponsors_count ?? 0} {cat.sponsors_count === 1 ? 'partner' : 'partners'}
+                            </span>
+                          </div>
+                          {cat.description && (
+                            <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                              {cat.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => openAddModal(cat.sort_order, cat.name)}
+                          className="px-2 py-1 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-[11px] font-semibold border border-purple-500/30 transition-colors cursor-pointer"
+                          title={`Add sponsor to ${cat.name}`}
+                        >
+                          + Add Partner
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openEditCategoryModal(cat)}
+                          className="p-1.5 rounded-lg bg-[#112344] hover:bg-[#182F58] border border-[#1E3A68] text-sky-400 hover:text-white transition-colors cursor-pointer"
+                          title="Edit Category"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCategory(cat)}
+                          className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            (cat.sponsors_count ?? 0) > 0
+                              ? 'bg-slate-800/40 border-slate-700/40 text-slate-600 cursor-not-allowed'
+                              : 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20 text-rose-400'
+                          }`}
+                          title={
+                            (cat.sponsors_count ?? 0) > 0
+                              ? `Cannot delete while ${cat.sponsors_count} partner(s) exist`
+                              : 'Delete Category'
+                          }
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 9. DELETE CATEGORY CONFIRMATION MODAL */}
+      {deleteConfirmCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-[#0A1529] border border-[#1E3A68] rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200 space-y-4">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto">
+              <Trash2 className="w-5 h-5" />
+            </div>
+
+            <div className="text-center">
+              <h4 className="text-base font-bold text-white">Delete Category?</h4>
+              <p className="text-xs text-slate-300 mt-1">
+                Are you sure you want to delete category{' '}
+                <strong className="text-white font-bold">{deleteConfirmCategory.name}</strong>?
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                This category currently has 0 sponsors. This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmCategory(null)}
+                className="flex-1 py-2 rounded-xl bg-[#112344] hover:bg-[#182F58] text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteCategory}
                 className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors shadow-md cursor-pointer"
               >
                 Confirm Delete
