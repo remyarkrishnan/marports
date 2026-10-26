@@ -19,7 +19,7 @@ class StrategicPartnerSeeder extends Seeder
 
         if ($hasSortOrderConflict) {
             // Re-align default tiers to make space for Strategic Partner as Tier 1:
-            // Tier 2: Premier Sponsor
+            // Tier 2: Gold Sponsor
             Sponsor::where('name', 'AS Gold Sponsor')->update(['sort_order' => 2]);
 
             // Tier 3: Registration & Badge

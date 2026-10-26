@@ -7,28 +7,28 @@ import { resolveAsset } from '../utils/asset';
 /**
  * Resolve the sponsor tier based on sponsor type or explicit tier string.
  * Tier hierarchy in descending order of prominence:
- * 1. strategic   - Strategic Partner (Biggest)
- * 2. premier     - Premier Sponsor
- * 3. registration - Registration Area / Badge & Lanyard Sponsor
- * 4. lunch       - Lunch & Coffee Sponsor
- * 5. tabletop    - Table Top Sponsor
- * 6. associate   - Associate Sponsor
- * 7. compact     - Promoting Organisations / Supporting Partners (Smallest)
+ * 1. strategic    - Strategic Partner (Biggest benchmark)
+ * 2. gold         - Gold Sponsor (Visibly distinct step-down, ~144px max logo)
+ * 3. registration - Registration Area / Badge & Lanyard Sponsor (~104px max logo)
+ * 4. lunch        - Lunch & Coffee Sponsor (~80px max logo)
+ * 5. tabletop     - Table Top Sponsor (~64px max logo)
+ * 6. associate    - Associate Sponsor (~48px max logo)
+ * 7. compact      - Promoting Organisations / Supporting Partners (~36px max logo)
  */
 export function getSponsorTier(sponsor, explicitTier) {
-  if (explicitTier && ['strategic', 'premier', 'registration', 'lunch', 'tabletop', 'associate', 'compact'].includes(explicitTier)) {
-    return explicitTier;
+  if (explicitTier && ['strategic', 'gold', 'premier', 'registration', 'lunch', 'tabletop', 'associate', 'compact'].includes(explicitTier)) {
+    return explicitTier === 'premier' ? 'gold' : explicitTier;
   }
   const type = sponsor?.type || '';
   if (/strategic/i.test(type)) return 'strategic';
-  if (/premier/i.test(type)) return 'premier';
+  if (/gold|premier/i.test(type)) return 'gold';
   if (/registration|badge|lanyard/i.test(type)) return 'registration';
   if (/lunch|coffee/i.test(type)) return 'lunch';
   if (/table\s*top/i.test(type)) return 'tabletop';
   if (/associate/i.test(type)) return 'associate';
   if (/promoting|supporting/i.test(type)) return 'compact';
   if (explicitTier === 'compact') return 'compact';
-  if (explicitTier === 'featured') return 'premier';
+  if (explicitTier === 'featured') return 'gold';
   return 'default';
 }
 
@@ -75,23 +75,23 @@ function SingleSponsorCard({ sponsor, tier, size = 'default', isRegistrationArea
     );
   }
 
-  // 2. PREMIER SPONSOR (Tier 2 - Visibly second largest, noticeably larger than Registration/Badge)
-  if (effectiveTier === 'premier') {
+  // 2. GOLD SPONSOR (Tier 2 - Visibly distinct step-down from Strategic Partner, noticeably larger than Tier 3)
+  if (effectiveTier === 'gold' || effectiveTier === 'premier') {
     return (
       <CardWrapper
         {...wrapperProps}
-        className="block p-7 sm:p-9 md:p-10 rounded-3xl bg-white border-2 border-[#D9A441] shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
+        className="block p-6 sm:p-7 md:p-8 rounded-3xl bg-white border-2 border-[#D9A441] shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
       >
-        <div className="absolute top-0 right-0 w-36 h-36 bg-[#D9A441]/12 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#0E4B75]/8 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9A441]/12 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#0E4B75]/8 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="min-h-[145px] sm:min-h-[175px] md:min-h-[205px] flex items-center justify-center py-2">
+        <div className="min-h-[125px] sm:min-h-[150px] md:min-h-[170px] flex items-center justify-center py-2">
           {hasLogo ? (
             <img
               src={resolveAsset(sponsor.logo)}
-              alt={sponsor.name || 'Premier Sponsor'}
+              alt={sponsor.name || 'Gold Sponsor'}
               onError={() => setImgFailed(true)}
-              className="max-h-30 sm:max-h-38 md:max-h-44 max-w-[260px] sm:max-w-[360px] md:max-w-[420px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="max-h-24 sm:max-h-30 md:max-h-36 max-w-[240px] sm:max-w-[300px] md:max-w-[360px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="text-xl sm:text-2xl font-serif-heading font-bold text-[#0A1E3F]">
@@ -103,23 +103,23 @@ function SingleSponsorCard({ sponsor, tier, size = 'default', isRegistrationArea
     );
   }
 
-  // 3. REGISTRATION AREA & BADGE / LANYARD (Tier 3 - Step down from Premier)
+  // 3. REGISTRATION AREA & BADGE / LANYARD (Tier 3 - Step down from Gold Sponsor)
   if (effectiveTier === 'registration') {
     return (
       <CardWrapper
         {...wrapperProps}
-        className="block p-6 sm:p-7 md:p-8 rounded-2xl bg-white border-2 border-[#D9A441]/80 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
+        className="block p-5 sm:p-6 md:p-7 rounded-2xl bg-white border-2 border-[#D9A441]/80 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-center h-full flex flex-col justify-center"
       >
-        <div className="absolute top-0 right-0 w-28 h-28 bg-[#D9A441]/10 rounded-full blur-xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-28 h-28 bg-[#0E4B75]/5 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#D9A441]/10 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#0E4B75]/5 rounded-full blur-xl pointer-events-none" />
 
-        <div className="min-h-[125px] sm:min-h-[145px] md:min-h-[165px] flex items-center justify-center py-2">
+        <div className="min-h-[110px] sm:min-h-[125px] md:min-h-[140px] flex items-center justify-center py-2">
           {hasLogo ? (
             <img
               src={resolveAsset(sponsor.logo)}
               alt={sponsor.name || 'Sponsor'}
               onError={() => setImgFailed(true)}
-              className="max-h-24 sm:max-h-30 md:max-h-34 max-w-[230px] sm:max-w-[300px] md:max-w-[340px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="max-h-18 sm:max-h-22 md:max-h-26 max-w-[200px] sm:max-w-[250px] md:max-w-[280px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="text-lg sm:text-xl font-serif-heading font-bold text-[#0A1E3F]">
@@ -316,11 +316,11 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 );
               }
 
-              // Tier 2: Premier Sponsor (second biggest tier)
-              const isPremierRow = row.length > 0 && row.every((s) => /premier/i.test(s.type));
-              if (isPremierRow) {
+              // Tier 2: Gold Sponsor (second biggest tier, step-down from Strategic Partner)
+              const isGoldRow = row.length > 0 && row.every((s) => /gold|premier/i.test(s.type));
+              if (isGoldRow) {
                 const count = row.length;
-                const title = count > 1 ? 'Premier Sponsors' : 'Premier Sponsor';
+                const title = count > 1 ? 'Gold Sponsors' : 'Gold Sponsor';
                 return (
                   <ScrollReveal key={`row-${rowIdx}`} className="space-y-4">
                     <div className="text-center mb-5">
@@ -332,7 +332,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
 
                     <div className={`mx-auto ${
                       count === 1
-                        ? 'max-w-xl'
+                        ? 'max-w-lg'
                         : count === 2
                         ? 'grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl'
                         : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl'
@@ -341,7 +341,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                         <SingleSponsorCard
                           key={s.id || idx}
                           sponsor={s}
-                          tier="premier"
+                          tier="gold"
                         />
                       ))}
                     </div>
@@ -601,11 +601,11 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                   {displayBadge && (
                     <div className="text-center mb-5">
                       <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-xs ${
-                        commonType && (/registration/i.test(commonType) || /premier/i.test(commonType) || /badge|lanyard/i.test(commonType))
+                        commonType && (/registration/i.test(commonType) || /gold|premier/i.test(commonType) || /badge|lanyard/i.test(commonType))
                           ? 'text-[#0A1E3F] bg-[#D9A441]/20 border-[#D9A441]/50'
                           : 'text-[#0E4B75] bg-[#0E4B75]/10 border-[#0E4B75]/20'
                       }`}>
-                        {count === 1 || (commonType && (/registration/i.test(commonType) || /premier/i.test(commonType) || /badge|lanyard/i.test(commonType))) ? (
+                        {count === 1 || (commonType && (/registration/i.test(commonType) || /gold|premier/i.test(commonType) || /badge|lanyard/i.test(commonType))) ? (
                           <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
                         ) : (
                           <Award className="w-3.5 h-3.5 text-[#0E4B75]" />
@@ -627,7 +627,7 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                   {count === 2 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
                       {row.map((s, idx) => {
-                        const isFeaturedTier = s.type && (/registration/i.test(s.type) || /premier/i.test(s.type) || /badge|lanyard/i.test(s.type));
+                        const isFeaturedTier = s.type && (/registration/i.test(s.type) || /gold|premier/i.test(s.type) || /badge|lanyard/i.test(s.type));
                         return (
                           <div key={s.id || idx} className="flex flex-col items-center">
                             {!commonType && s.type && (
@@ -703,19 +703,19 @@ export default function SponsorGrid({ sponsors, onOpenRegister }) {
                 </ScrollReveal>
               )}
 
-              {/* 2. Premier Sponsor */}
-              {sponsors?.premier && sponsors.premier.length > 0 && (
+              {/* 2. Gold Sponsor Fallback */}
+              {((sponsors?.gold && sponsors.gold.length > 0) || (sponsors?.premier && sponsors.premier.length > 0)) && (
                 <ScrollReveal className="text-center">
                   <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 bg-[#D9A441]/20 border border-[#D9A441]/50 rounded-full text-xs font-bold uppercase tracking-wider text-[#0A1E3F]">
                     <Sparkles className="w-3.5 h-3.5 text-[#D9A441]" />
-                    Premier Sponsor
+                    {((sponsors?.gold?.length || 0) + (sponsors?.premier?.length || 0)) > 1 ? 'Gold Sponsors' : 'Gold Sponsor'}
                   </div>
-                  <div className="max-w-xl mx-auto">
-                    {sponsors.premier.map((s, idx) => (
+                  <div className="max-w-lg mx-auto">
+                    {[...(sponsors?.gold || []), ...(sponsors?.premier || [])].map((s, idx) => (
                       <SingleSponsorCard
                         key={idx}
-                        sponsor={{ name: s.name, type: s.role, logo: s.logo, website_url: s.website_url }}
-                        tier="premier"
+                        sponsor={{ name: s.name, type: s.role || 'Gold Sponsor', logo: s.logo, website_url: s.website_url }}
+                        tier="gold"
                       />
                     ))}
                   </div>

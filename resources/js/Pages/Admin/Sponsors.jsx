@@ -46,7 +46,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
   // Common preset sponsor types
   const defaultTypes = [
     'Strategic Partner',
-    'Premier Sponsor',
+    'Gold Sponsor',
     'Registration Area Sponsor',
     'Badge and Lanyard Sponsor',
     'Lunch & Coffee Sponsor',
@@ -75,7 +75,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
     // 2. Standard category pattern matching
     if (/strategic/i.test(normalized)) return 1;
-    if (/premier/i.test(normalized)) return 2;
+    if (/gold|premier/i.test(normalized)) return 2;
     if (/registration|badge|lanyard/i.test(normalized)) return 3;
     if (/lunch|coffee/i.test(normalized)) return 4;
     if (/table\s*top/i.test(normalized)) return 5;

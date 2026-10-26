@@ -143,7 +143,7 @@ class SummitController extends Controller
                 if (! isset($categoryOrders[$typeKey])) {
                     $categoryOrders[$typeKey] = match (true) {
                         (bool) preg_match('/strategic/i', $sponsor->type) => 1,
-                        (bool) preg_match('/premier/i', $sponsor->type) => 2,
+                        (bool) preg_match('/gold|premier/i', $sponsor->type) => 2,
                         (bool) preg_match('/registration|badge|lanyard/i', $sponsor->type) => 3,
                         (bool) preg_match('/lunch|coffee/i', $sponsor->type) => 4,
                         (bool) preg_match('/table\s*top/i', $sponsor->type) => 5,
@@ -169,8 +169,8 @@ class SummitController extends Controller
                 'strategic' => [
                     ['name' => 'Directorate General of Maritime Administration', 'role' => 'Strategic Partner', 'tag' => 'DGMA', 'logo' => '/new/images/sponsors/directorate-general-of-maritime-administration.jpg', 'website_url' => 'https://dgshipping.gov.in/'],
                 ],
-                'premier' => [
-                    ['name' => 'AS Gold Sponsor', 'role' => 'Premier Sponsor', 'tag' => 'AS', 'logo' => '/new/images/sponsors/sponsor_1788931598_whatsapp-image-2026-09-09-at-102744.jpeg', 'website_url' => 'https://india.globalpsa.com/'],
+                'gold' => [
+                    ['name' => 'AS Gold Sponsor', 'role' => 'Gold Sponsor', 'tag' => 'AS', 'logo' => '/new/images/sponsors/sponsor_1788931598_whatsapp-image-2026-09-09-at-102744.jpeg', 'website_url' => 'https://india.globalpsa.com/'],
                 ],
                 'registration' => [
                     ['name' => 'Mazagon Dock Shipbuilders Limited', 'role' => 'Registration Area Sponsor', 'tag' => 'MDSL', 'logo' => '/new/images/sponsors/mazagon-dock-logo.jpg', 'website_url' => 'https://mazagondock.in/'],

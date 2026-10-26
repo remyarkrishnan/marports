@@ -129,7 +129,7 @@ class SponsorManagementTest extends TestCase
         // Simulate existing sponsor at order 1 (like on live before seeder runs)
         Sponsor::create([
             'name' => 'AS Gold Sponsor',
-            'type' => 'Premier Sponsor',
+            'type' => 'Gold Sponsor',
             'sort_order' => 1,
             'is_active' => true,
         ]);

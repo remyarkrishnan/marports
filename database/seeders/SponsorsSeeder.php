@@ -24,11 +24,11 @@ class SponsorsSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Tier 2: Premier Sponsor (sort_order: 2)
+            // Tier 2: Gold Sponsor (sort_order: 2)
             [
                 'name' => 'AS Gold Sponsor',
-                'type' => 'Premier Sponsor',
-                'description' => 'Lead Maritime Partner & Premier Sponsor',
+                'type' => 'Gold Sponsor',
+                'description' => 'Lead Maritime Partner & Gold Sponsor',
                 'logo' => '/new/images/sponsors/sponsor_1788931598_whatsapp-image-2026-09-09-at-102744.jpeg',
                 'website_url' => 'https://india.globalpsa.com/',
                 'sort_order' => 2,
