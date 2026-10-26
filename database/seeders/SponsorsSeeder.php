@@ -55,7 +55,7 @@ class SponsorsSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Tier 4: Lunch & Coffee Sponsors (sort_order: 4)
+            // Tier 4: Lunch & Coffee Sponsors & Conference Session Sponsor (sort_order: 4)
             [
                 'name' => 'ABS Marine Services Ltd',
                 'type' => 'Lunch & Coffee Sponsor',
@@ -71,6 +71,15 @@ class SponsorsSeeder extends Seeder
                 'description' => 'Premier Defence Shipyard of India',
                 'logo' => '/new/images/sponsors/grse-logo.jpg',
                 'website_url' => 'https://grse.in/',
+                'sort_order' => 4,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Sankri Maritime Solutions Pvt Ltd',
+                'type' => 'Conference Session Sponsor',
+                'description' => 'Conference Session Sponsor for MARPORTS GLOBAL 2027',
+                'logo' => '/new/images/sponsors/sankri-maritime-logo.svg',
+                'website_url' => null,
                 'sort_order' => 4,
                 'is_active' => true,
             ],

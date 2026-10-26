@@ -145,7 +145,7 @@ class SummitController extends Controller
                         (bool) preg_match('/strategic/i', $sponsor->type) => 1,
                         (bool) preg_match('/gold|premier/i', $sponsor->type) => 2,
                         (bool) preg_match('/registration|badge|lanyard/i', $sponsor->type) => 3,
-                        (bool) preg_match('/lunch|coffee/i', $sponsor->type) => 4,
+                        (bool) preg_match('/lunch|coffee|conference/i', $sponsor->type) => 4,
                         (bool) preg_match('/table\s*top/i', $sponsor->type) => 5,
                         (bool) preg_match('/associate/i', $sponsor->type) => 6,
                         (bool) preg_match('/promoting|supporting/i', $sponsor->type) => 7,
@@ -181,6 +181,9 @@ class SummitController extends Controller
                 'lunch_coffee' => [
                     ['name' => 'ABS Marine Services Ltd', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'ABS', 'logo' => '/new/images/sponsors/abs-marine-services-logo.jpg', 'website_url' => 'https://absmarine.com/'],
                     ['name' => 'GRSE (Garden Reach Shipbuilders & Engineers)', 'role' => 'Lunch & Coffee Sponsor', 'tag' => 'GRSE', 'logo' => '/new/images/sponsors/grse-logo.jpg', 'website_url' => 'https://grse.in/'],
+                ],
+                'conference_session' => [
+                    ['name' => 'Sankri Maritime Solutions Pvt Ltd', 'role' => 'Conference Session Sponsor', 'tag' => 'SANKRI', 'logo' => '/new/images/sponsors/sankri-maritime-logo.svg', 'website_url' => null],
                 ],
                 'table_top' => [
                     ['name' => 'Nirmon Marine & Offshore Design Pvt Ltd', 'role' => 'Table Top Sponsor', 'tag' => 'NIRMON', 'logo' => '/new/images/sponsors/nirmon-marine-logo.jpg', 'website_url' => 'https://www.nirmondesign.com/'],

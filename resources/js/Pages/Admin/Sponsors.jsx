@@ -50,6 +50,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     'Registration Area Sponsor',
     'Badge and Lanyard Sponsor',
     'Lunch & Coffee Sponsor',
+    'Conference Session Sponsor',
     'Table Top Sponsor',
     'Associate Sponsor',
     'Promoting Organisation',
@@ -77,7 +78,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     if (/strategic/i.test(normalized)) return 1;
     if (/gold|premier/i.test(normalized)) return 2;
     if (/registration|badge|lanyard/i.test(normalized)) return 3;
-    if (/lunch|coffee/i.test(normalized)) return 4;
+    if (/lunch|coffee|conference/i.test(normalized)) return 4;
     if (/table\s*top/i.test(normalized)) return 5;
     if (/associate/i.test(normalized)) return 6;
     if (/promoting|supporting/i.test(normalized)) return 7;

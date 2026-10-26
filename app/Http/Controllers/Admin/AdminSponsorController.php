@@ -64,7 +64,7 @@ class AdminSponsorController extends Controller
         if (preg_match('/registration|badge|lanyard/i', $type)) {
             return 3;
         }
-        if (preg_match('/lunch|coffee/i', $type)) {
+        if (preg_match('/lunch|coffee|conference/i', $type)) {
             return 4;
         }
         if (preg_match('/table\s*top/i', $type)) {
