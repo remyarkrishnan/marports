@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\AdminSponsorController;
 use App\Models\Sponsor;
 use App\Models\User;
+use Database\Seeders\ConferenceSessionSponsorSeeder;
 use Database\Seeders\StrategicPartnerSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -143,5 +145,22 @@ class SponsorManagementTest extends TestCase
 
         $asGold = Sponsor::where('name', 'AS Gold Sponsor')->first();
         $this->assertEquals(2, $asGold->sort_order);
+    }
+
+    public function test_conference_session_sponsor_seeder_creates_sponsor_at_sort_order_four(): void
+    {
+        $this->seed(ConferenceSessionSponsorSeeder::class);
+
+        $sponsor = Sponsor::where('name', 'Sankri Maritime Solutions Pvt Ltd')->first();
+        $this->assertNotNull($sponsor);
+        $this->assertEquals(4, $sponsor->sort_order);
+        $this->assertEquals('Conference Session Sponsor', $sponsor->type);
+        $this->assertStringContainsString('sankri-maritime-logo.svg', $sponsor->logo);
+    }
+
+    public function test_conference_session_sponsor_category_resolves_to_row_four(): void
+    {
+        $order = AdminSponsorController::resolveSortOrderForType('Conference Session Sponsor');
+        $this->assertEquals(4, $order);
     }
 }

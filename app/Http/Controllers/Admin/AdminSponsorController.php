@@ -158,7 +158,7 @@ class AdminSponsorController extends Controller
         // If category changed, align with that category's sort order
         $typeChanged = strtolower(trim($sponsor->type)) !== strtolower(trim($validated['type']));
         $sortOrder = $typeChanged
-            ? self::resolveSortOrderForType($validated['type'])
+            ? self::resolveSortOrderForType($validated['type'], isset($validated['sort_order']) ? (int) $validated['sort_order'] : null)
             : (isset($validated['sort_order']) ? (int) $validated['sort_order'] : (int) $sponsor->sort_order);
 
         $updateData = [
