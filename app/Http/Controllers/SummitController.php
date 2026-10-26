@@ -136,7 +136,31 @@ class SummitController extends Controller
         }
 
         if ($dbSponsors->isNotEmpty()) {
-            $sponsors = $dbSponsors->groupBy('sort_order')->values()->map(function ($group) {
+            // Group active sponsors so partners of the same category are always rendered in the same row
+            $categoryOrders = [];
+            foreach ($dbSponsors as $sponsor) {
+                $typeKey = strtolower(trim($sponsor->type ?? ''));
+                if (! isset($categoryOrders[$typeKey])) {
+                    $categoryOrders[$typeKey] = match (true) {
+                        (bool) preg_match('/strategic/i', $sponsor->type) => 1,
+                        (bool) preg_match('/premier/i', $sponsor->type) => 2,
+                        (bool) preg_match('/registration|badge|lanyard/i', $sponsor->type) => 3,
+                        (bool) preg_match('/lunch|coffee/i', $sponsor->type) => 4,
+                        (bool) preg_match('/table\s*top/i', $sponsor->type) => 5,
+                        (bool) preg_match('/associate/i', $sponsor->type) => 6,
+                        (bool) preg_match('/promoting|supporting/i', $sponsor->type) => 7,
+                        default => (int) ($sponsor->sort_order ?? 99),
+                    };
+                }
+            }
+
+            $sponsors = $dbSponsors->groupBy(function ($sponsor) use ($categoryOrders) {
+                $typeKey = strtolower(trim($sponsor->type ?? ''));
+
+                return $categoryOrders[$typeKey] ?? (int) ($sponsor->sort_order ?? 99);
+            })->sortBy(function ($group, $key) {
+                return (int) $key;
+            })->values()->map(function ($group) {
                 return $group->values();
             })->toArray();
         } else {

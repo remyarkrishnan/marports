@@ -39,6 +39,54 @@ class AdminSponsorController extends Controller
     }
 
     /**
+     * Resolve the sort order for a sponsor so partners of the same category are grouped together.
+     */
+    public static function resolveSortOrderForType(string $type, ?int $explicitSortOrder = null): int
+    {
+        $normalizedType = strtolower(trim($type));
+
+        // 1. If other sponsors with this category already exist in the database, match their sort order
+        $existingOrder = Sponsor::whereRaw('LOWER(type) = ?', [$normalizedType])
+            ->whereNotNull('sort_order')
+            ->value('sort_order');
+
+        if ($existingOrder !== null) {
+            return (int) $existingOrder;
+        }
+
+        // 2. Standard tier patterns
+        if (preg_match('/strategic/i', $type)) {
+            return 1;
+        }
+        if (preg_match('/premier/i', $type)) {
+            return 2;
+        }
+        if (preg_match('/registration|badge|lanyard/i', $type)) {
+            return 3;
+        }
+        if (preg_match('/lunch|coffee/i', $type)) {
+            return 4;
+        }
+        if (preg_match('/table\s*top/i', $type)) {
+            return 5;
+        }
+        if (preg_match('/associate/i', $type)) {
+            return 6;
+        }
+        if (preg_match('/promoting|supporting/i', $type)) {
+            return 7;
+        }
+
+        // 3. If explicit sort order was provided, use it
+        if ($explicitSortOrder !== null && $explicitSortOrder > 0) {
+            return $explicitSortOrder;
+        }
+
+        // 4. Default to next row
+        return (int) ((Sponsor::max('sort_order') ?? 0) + 1);
+    }
+
+    /**
      * Store a newly created sponsor in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -48,7 +96,7 @@ class AdminSponsorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'website_url' => ['nullable', 'string', 'max:500'],
-            'sort_order' => ['required', 'integer', 'min:1', 'max:999'],
+            'sort_order' => ['nullable', 'integer', 'min:1', 'max:999'],
             'is_active' => ['boolean'],
             'logo_file' => ['nullable', 'max:5120'], // 5MB max
             'logo_url' => ['nullable', 'string', 'max:1000'],
@@ -72,17 +120,22 @@ class AdminSponsorController extends Controller
             $logoPath = $validated['logo_url'];
         }
 
+        $sortOrder = self::resolveSortOrderForType(
+            $validated['type'],
+            isset($validated['sort_order']) ? (int) $validated['sort_order'] : null
+        );
+
         Sponsor::create([
             'type' => $validated['type'],
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'website_url' => $validated['website_url'] ?? null,
-            'sort_order' => (int) $validated['sort_order'],
+            'sort_order' => $sortOrder,
             'is_active' => $request->boolean('is_active', true),
             'logo' => $logoPath,
         ]);
 
-        return back()->with('success', "Sponsor '{$validated['name']}' added successfully.");
+        return back()->with('success', "Sponsor '{$validated['name']}' added successfully to {$validated['type']} (Row #{$sortOrder}).");
     }
 
     /**
@@ -95,19 +148,25 @@ class AdminSponsorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'website_url' => ['nullable', 'string', 'max:500'],
-            'sort_order' => ['required', 'integer', 'min:1', 'max:999'],
+            'sort_order' => ['nullable', 'integer', 'min:1', 'max:999'],
             'is_active' => ['boolean'],
             'logo_file' => ['nullable', 'max:5120'],
             'logo_url' => ['nullable', 'string', 'max:1000'],
             'remove_logo' => ['nullable', 'boolean'],
         ]);
 
+        // If category changed, align with that category's sort order
+        $typeChanged = strtolower(trim($sponsor->type)) !== strtolower(trim($validated['type']));
+        $sortOrder = $typeChanged
+            ? self::resolveSortOrderForType($validated['type'])
+            : (isset($validated['sort_order']) ? (int) $validated['sort_order'] : (int) $sponsor->sort_order);
+
         $updateData = [
             'type' => $validated['type'],
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'website_url' => $validated['website_url'] ?? null,
-            'sort_order' => (int) $validated['sort_order'],
+            'sort_order' => $sortOrder,
             'is_active' => $request->boolean('is_active', true),
         ];
 

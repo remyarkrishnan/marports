@@ -46,17 +46,48 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
   // Common preset sponsor types
   const defaultTypes = [
     'Strategic Partner',
+    'Premier Sponsor',
     'Registration Area Sponsor',
+    'Badge and Lanyard Sponsor',
     'Lunch & Coffee Sponsor',
     'Table Top Sponsor',
     'Associate Sponsor',
     'Promoting Organisation',
     'Lead Maritime Partner',
-    'Badge & Lanyard Sponsor',
-    'Badge and Lanyard Sponsor',
-    'Gala Dinner Sponsor',
     'Technology Partner',
+    'Gala Dinner Sponsor',
   ];
+
+  /**
+   * Resolve the sort order for a sponsor so partners of the same category are grouped together.
+   */
+  const getCategorySortOrder = (typeName, existingSponsors = sponsors) => {
+    if (!typeName) return 1;
+    const normalized = typeName.trim().toLowerCase();
+
+    // 1. If any sponsor with this exact/case-insensitive type already exists in DB, use its sort order
+    const match = existingSponsors.find(
+      (s) => s.type && s.type.trim().toLowerCase() === normalized
+    );
+    if (match && match.sort_order) {
+      return Number(match.sort_order);
+    }
+
+    // 2. Standard category pattern matching
+    if (/strategic/i.test(normalized)) return 1;
+    if (/premier/i.test(normalized)) return 2;
+    if (/registration|badge|lanyard/i.test(normalized)) return 3;
+    if (/lunch|coffee/i.test(normalized)) return 4;
+    if (/table\s*top/i.test(normalized)) return 5;
+    if (/associate/i.test(normalized)) return 6;
+    if (/promoting|supporting/i.test(normalized)) return 7;
+
+    // 3. Fallback to next new row
+    if (existingSponsors.length > 0) {
+      return Math.max(...existingSponsors.map((s) => Number(s.sort_order) || 1)) + 1;
+    }
+    return 1;
+  };
 
   const allAvailableTypes = useMemo(() => {
     const set = new Set([...defaultTypes, ...existingTypes]);
@@ -65,7 +96,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
 
   // Form for Add & Edit
   const form = useForm({
-    type: 'Registration Area Sponsor',
+    type: 'Strategic Partner',
     custom_type: '',
     name: '',
     description: '',
@@ -82,14 +113,24 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
     setLogoPreview(null);
     form.reset();
 
-    const order = targetSortOrder !== null
-      ? Number(targetSortOrder)
-      : (sponsors.length > 0 ? Math.max(...sponsors.map((s) => s.sort_order || 1)) + 1 : 1);
+    // Determine type
+    let typeToUse = suggestedType;
+    if (!typeToUse && targetSortOrder !== null) {
+      const inRow = sponsors.find((s) => Number(s.sort_order) === Number(targetSortOrder));
+      if (inRow) typeToUse = inRow.type;
+    }
+    if (!typeToUse) {
+      typeToUse = defaultTypes[0] || 'Strategic Partner';
+    }
 
-    const typeToUse = suggestedType || (defaultTypes[0] || 'Registration Area Sponsor');
     const isCustom = !defaultTypes.includes(typeToUse);
 
-    setTargetRowTier(targetSortOrder !== null ? Number(targetSortOrder) : null);
+    // If targetSortOrder was explicitly provided, use it; otherwise auto-align with category
+    const order = targetSortOrder !== null
+      ? Number(targetSortOrder)
+      : getCategorySortOrder(typeToUse, sponsors);
+
+    setTargetRowTier(order);
 
     form.setData({
       type: isCustom ? 'CUSTOM' : typeToUse,
@@ -412,7 +453,11 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                 </p>
               </div>
             ) : (
-              groupedBySortOrder.map(([sortOrder, sponsorList]) => (
+              groupedBySortOrder.map(([sortOrder, sponsorList]) => {
+                const uniqueCategoriesInRow = Array.from(new Set(sponsorList.map((s) => s.type).filter(Boolean)));
+                const rowCategoryTitle = uniqueCategoriesInRow.length > 0 ? uniqueCategoriesInRow.join(' & ') : `Row ${sortOrder}`;
+
+                return (
                 <div
                   key={sortOrder}
                   className="bg-[#081120] border border-[#152747] rounded-2xl overflow-hidden shadow-lg"
@@ -425,13 +470,13 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-white flex items-center gap-2">
-                          <span>Row {sortOrder} Tier</span>
+                          <span>Row {sortOrder} — {rowCategoryTitle}</span>
                           <span className="text-xs font-normal text-slate-400">
-                            ({sponsorList.length} {sponsorList.length === 1 ? 'partner' : 'partners'} in this row)
+                            ({sponsorList.length} {sponsorList.length === 1 ? 'partner' : 'partners'})
                           </span>
                         </h3>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          Appears together in horizontal row {sortOrder} on public page
+                          Appears together in {rowCategoryTitle} on public website
                         </p>
                       </div>
                     </div>
@@ -446,7 +491,7 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                         className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/25 transition-all cursor-pointer hover:scale-105 active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Add Sponsor to Row {sortOrder}</span>
+                        <span>Add Sponsor to {rowCategoryTitle}</span>
                       </button>
                     </div>
                   </div>
@@ -604,7 +649,8 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                     </button>
                   </div>
                 </div>
-              ))
+              );
+            })
             )}
           </div>
         ) : (
@@ -761,7 +807,20 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                 </label>
                 <select
                   value={form.data.type}
-                  onChange={(e) => form.setData('type', e.target.value)}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    if (newType === 'CUSTOM') {
+                      form.setData((prev) => ({ ...prev, type: 'CUSTOM' }));
+                    } else {
+                      const matchedOrder = getCategorySortOrder(newType, sponsors);
+                      form.setData((prev) => ({
+                        ...prev,
+                        type: newType,
+                        sort_order: matchedOrder,
+                      }));
+                      setTargetRowTier(matchedOrder);
+                    }
+                  }}
                   className="w-full px-3 py-2 rounded-xl bg-[#081120] border border-[#152747] text-white text-xs focus:outline-none focus:border-purple-500"
                   required
                 >
@@ -778,13 +837,50 @@ export default function Sponsors({ sponsors = [], metrics = {}, existingTypes = 
                     <input
                       type="text"
                       value={form.data.custom_type}
-                      onChange={(e) => form.setData('custom_type', e.target.value)}
+                      onChange={(e) => {
+                        const customVal = e.target.value;
+                        const matchedOrder = getCategorySortOrder(customVal, sponsors);
+                        form.setData((prev) => ({
+                          ...prev,
+                          custom_type: customVal,
+                          sort_order: matchedOrder,
+                        }));
+                        setTargetRowTier(matchedOrder);
+                      }}
                       placeholder="e.g. Lead Maritime Partner, Badge & Lanyard Sponsor"
                       className="w-full px-3 py-2 rounded-xl bg-[#081120] border border-purple-500 text-white text-xs focus:outline-none"
                       required
                     />
                   </div>
                 )}
+
+                {/* Category & Row Alignment Info */}
+                {(() => {
+                  const resolvedCat = form.data.type === 'CUSTOM' ? form.data.custom_type.trim() : form.data.type;
+                  const matchingSponsors = sponsors.filter(
+                    (s) => s.type && resolvedCat && s.type.trim().toLowerCase() === resolvedCat.toLowerCase() && (!editingSponsor || s.id !== editingSponsor.id)
+                  );
+                  return (
+                    <div className="mt-2.5 p-2.5 rounded-xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-between text-xs text-purple-200">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <span>
+                          Category Placement: <strong>Row #{form.data.sort_order} Tier</strong>
+                          {matchingSponsors.length > 0 ? (
+                            <span className="text-slate-300 ml-1">
+                              (groups with {matchingSponsors.length} existing {matchingSponsors.length === 1 ? 'partner' : 'partners'} in {resolvedCat})
+                            </span>
+                          ) : (
+                            <span className="text-slate-300 ml-1">(new row for this category)</span>
+                          )}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-600/30 text-purple-200 border border-purple-400/20 whitespace-nowrap">
+                        Auto-Matched
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Sponsor Name */}
